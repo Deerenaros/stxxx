@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/Amplifier.qml</file>
+        <file>resources/main.qml</file>
+        <file>resources/DevicesList.qml</file>
+        <file>resources/DeviceView.qml</file>
+        <file>resources/OffMode.qml</file>
+        <file>resources/Switcher.qml</file>
+        <file>resources/Oscilloscope.qml</file>
+        <file>resources/Settings.qml</file>
+        <file>resources/FDR.qml</file>
+        <file>resources/NLD.qml</file>
+        <file>resources/Receiver.qml</file>
+        <file>resources/SwitchItem.qml</file>
+        <file>resources/StatusBar.qml</file>
+    </qresource>
+</RCC>
