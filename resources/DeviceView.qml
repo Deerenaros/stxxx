@@ -13,47 +13,6 @@ GridLayout {
 
     property var openedDevices: createArray(devicesModel.count, 0)
 
-    TabBar {
-        id: bar
-
-        Layout.preferredHeight: 60
-        Layout.fillWidth: true
-        Layout.column: 1
-        Layout.columnSpan: 1
-        Layout.row: 1
-        Layout.rowSpan: 1
-
-        currentIndex: tabs.currentIndex
-
-        TabButton {
-            text: qsTr("OFFLINE")
-        }
-
-        TabButton {
-            text: qsTr("Settings")
-        }
-
-        TabButton {
-            text: qsTr("Switch")
-        }
-
-        TabButton {
-            text: qsTr("Amplifier")
-        }
-
-        TabButton {
-            text: qsTr("Receiver")
-        }
-
-        TabButton {
-            text: qsTr("NLD")
-        }
-
-        TabButton {
-            text: qsTr("FDR")
-        }
-    }
-
     SwipeView {
         id: tabs
 
@@ -61,7 +20,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.column: 1
         Layout.columnSpan: 1
-        Layout.row: 2
+        Layout.row: 1
         Layout.rowSpan: 1
 
         focus: false
@@ -95,8 +54,50 @@ GridLayout {
         }
     }
 
+    TabBar {
+        id: bar
+
+        Layout.bottomMargin: 0
+        Layout.preferredHeight: 40
+        Layout.fillWidth: true
+        Layout.column: 1
+        Layout.columnSpan: 1
+        Layout.row: 2
+        Layout.rowSpan: 1
+
+        currentIndex: tabs.currentIndex
+
+        TabButton {
+            text: qsTr("OFFLINE")
+        }
+
+        TabButton {
+            text: qsTr("Settings")
+        }
+
+        TabButton {
+            text: qsTr("Switch")
+        }
+
+        TabButton {
+            text: qsTr("Amplifier")
+        }
+
+        TabButton {
+            text: qsTr("Receiver")
+        }
+
+        TabButton {
+            text: qsTr("NLD")
+        }
+
+        TabButton {
+            text: qsTr("FDR")
+        }
+    }
+
     StatusBar {
-        Layout.topMargin: 10
+        Layout.topMargin: 0
         Layout.preferredHeight: 25
         Layout.fillWidth: true
 

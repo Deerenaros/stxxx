@@ -14,9 +14,6 @@ DevicesModel::DevicesModel(QQuickView *appViewer, QObject *parent)
     , m_waitingSwitch(QPair<quint8, quint8>(0, 0))
     , m_appViewer(appViewer)
 {
-    qRegisterMetaType<QAbstractSeries*>();
-    qRegisterMetaType<QAbstractAxis*>();
-
     for(const QSerialPortInfo &info: QSerialPortInfo::availablePorts()) {
         debug << DMark("found") << QString("%1 0x%2 0x%3")
                     .arg(info.description())
@@ -28,7 +25,6 @@ DevicesModel::DevicesModel(QQuickView *appViewer, QObject *parent)
             auto dev = new Device(name, info, this);
             m_devices.append(dev);
             connect(dev, &Device::packetRead, this, &DevicesModel::_packetRX);
-            dev->start();
         }
     }
 
@@ -39,7 +35,7 @@ DevicesModel::DevicesModel(QQuickView *appViewer, QObject *parent)
 
 DevicesModel::~DevicesModel() {
     for(Device *dev: m_devices) {
-        dev->wait();
+        dev->close();
     }
 }
 
@@ -90,6 +86,12 @@ bool DevicesModel::getReady() const {
     return m_devices[m_currentDevice]->isReady();
 }
 
+void DevicesModel::closeAll() {
+    for(Device *dev: m_devices) {
+        dev->close();
+    }
+}
+
 Device& DevicesModel::currentDevice() {
     return *m_devices[m_currentDevice];
 }
@@ -111,6 +113,7 @@ void DevicesModel::setModeForCurrent(char mode) {
 
         char buff[] = {'R', mode};
         currentDevice().write(QByteArray(buff, 2));
+        _specifyOnModeChange(mode);
     } else {
         currentDevice().close();
         emit statusSignal(-1, -1);
@@ -124,6 +127,14 @@ void DevicesModel::setSeries(QAbstractSeries* series) {
     m_series = static_cast<QXYSeries*>(series);
 }
 
+void DevicesModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8 day) {
+    char time[] = {'T', 1, hours, min};
+    char date[] = {'T', 2, day, month, year};
+
+    currentDevice().write(QByteArray(time, 4));
+    currentDevice().write(QByteArray(date, 5));
+}
+
 QHash<int, QByteArray> DevicesModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name";
@@ -133,31 +144,50 @@ QHash<int, QByteArray> DevicesModel::roleNames() const {
 
 QByteArray DevicesModel::_nextSwitch(qint8 in, qint8 out) {
     if(in == 0 || out == 0) {
-        in = 1;
-        out = 2;
-    } else if(out >= 8) {
-        in += 1;
-        out = 2;
-    } else {
+        out = 1;
+        in = 2;
+    } else if(in >= 8) {
         out += 1;
+        in = out+1;
+    } else {
+        in += 1;
     }
 
-    if(in > 7) {
-        in = 1;
-        out = 2;
+    if(out > 7) {
+        out = 1;
+        in = 2;
     }
 
     char buff[] = {'I', 1, in, out};
-    m_waitingSwitch = QPair<quint8, quint8>(in, out);
+    m_waitingSwitch = QPair<qint8, qint8>(in, out);
     return QByteArray(buff, 4);
+}
+
+void DevicesModel::_specifyOnModeChange(char mode) {
+    switch(mode) {
+    case 5:
+        currentDevice().write(QByteArray("S\x0c\x01", 3));
+        break;
+    }
 }
 
 void DevicesModel::_toStatus(QByteArray& bytes) {
     _toBattery(bytes.mid(5, 3));
+    switch(bytes[1]) {
+    case 1:
+        emit dateSignal(bytes[8], bytes[9], bytes[10], bytes[11], bytes[12]);
+        break;
+    }
 }
 
 void DevicesModel::_toBattery(const QByteArray &bytes) {
     emit statusSignal(BATTERY_SCALE*bytes[1], bytes[2] == 1);
+}
+
+bool DevicesModel::_haveToContinueSwitch(QPair<qint8, qint8> inout) {
+    bool result = !(m_waitingSwitch.first || m_waitingSwitch.second);
+    result |= m_waitingReset || inout == m_waitingSwitch;
+    return result;
 }
 
 void DevicesModel::_toSwitch(QByteArray& bytes) {
@@ -165,13 +195,17 @@ void DevicesModel::_toSwitch(QByteArray& bytes) {
 
     qint8 input = *reinterpret_cast<qint8*>(data+4);
     qint8 output = *reinterpret_cast<qint8*>(data+5);
-    double dc = *reinterpret_cast<qint16*>(data+0) / 10;
-    double ac = *reinterpret_cast<qint16*>(data+2) / 10;
+    double dc = *reinterpret_cast<qint16*>(data+0) / SWITCH_ACDC_SCALE;
+    double ac = *reinterpret_cast<qint16*>(data+2) / SWITCH_ACDC_SCALE;
+
     debug << DMark("switch") << QString("dc: %1 ac: %2 in: %3 out: %4").arg(dc).arg(ac).arg(input).arg(output);
 
-    if(QPair<quint8, quint8>(input, output) == m_waitingSwitch) {
+    if(_haveToContinueSwitch(QPair<qint8, qint8>(input, output))) {
         currentDevice().write(_nextSwitch(input, output));
+        m_waitingReset = SWITCH_PACKETS_TO_RESET;
         emit switcherSignal(input, output, ac, dc);
+    } else {
+        m_waitingReset += 1;
     }
 }
 
@@ -184,7 +218,7 @@ void DevicesModel::_toAmplifier(QByteArray& bytes) {
 
     int size = m_amplifier.size();
     if(size > 1024) {
-        m_amplifier.remove(0, size - 1024);
+        m_amplifier.remove(0, size - AMPLIFIER_LENGTH);
     }
 
     for(i = 0; i < m_amplifier.size() - data.size(); i++) {
@@ -207,7 +241,20 @@ void DevicesModel::_toNLD(QByteArray& bytes) {
 }
 
 void DevicesModel::_toFDR(QByteArray& bytes) {
-    Q_UNUSED(bytes);
+    if(bytes[1] != '\0') {
+        currentDevice().write(_nextSwitch(bytes[3], bytes[4]));
+
+        if(bytes[2] > '\0') {
+            emit fdrSignal(bytes[1], bytes[3], bytes[4], *reinterpret_cast<qint16*>(bytes.data()+5), bytes[7]);
+            for(qint8 i = 1; i < bytes[2]; i++) {
+                emit fdrSignal(5, bytes[3], bytes[4], *reinterpret_cast<qint16*>(bytes.data() + 5 + i*3), bytes[7 + i*3]);
+            }
+        } else {
+            emit fdrSignal(-1, bytes[3], bytes[4], 0, 0);
+        }
+    } else {
+        emit fdrSignal(0, bytes[3], bytes[4], 0, 0);
+    }
 }
 
 void DevicesModel::_packetRX(Device* sender, QByteArray* packet) {

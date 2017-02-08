@@ -13,5 +13,7 @@
         <file>resources/Receiver.qml</file>
         <file>resources/SwitchItem.qml</file>
         <file>resources/StatusBar.qml</file>
+        <file>resources/FDRItem.qml</file>
+        <file>resources/FDRItems.qml</file>
     </qresource>
 </RCC>

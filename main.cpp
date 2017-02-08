@@ -1,6 +1,11 @@
 //#define DEBUG_TO_STD
 #define DEBUG_TO_NET
 
+// TODO: Рефлектометр/нелинейник
+// TODO: Сохранение результатов
+// TODO: Создание отчёта
+// TODO: лаааааааааааааааааааапшааааааааааааааааа
+
 #include <QApplication>
 #include <QQmlContext>
 #include <QQuickView>
@@ -93,6 +98,8 @@ int main(int argc, char *argv[]) {
     viewer.setSource(QUrl("qrc:/resources/main.qml"));
     viewer.setResizeMode(QQuickView::SizeRootObjectToView);
     viewer.show();
+
+    QObject::connect(&app, &QApplication::aboutToQuit, &model, &DevicesModel::closeAll);
 
     return app.exec();
 }

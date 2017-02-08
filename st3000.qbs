@@ -11,6 +11,8 @@ CppApplication {
         "resources/DeviceView.qml",
         "resources/DevicesList.qml",
         "resources/FDR.qml",
+        "resources/FDRItem.qml",
+        "resources/FDRItems.qml",
         "resources/NLD.qml",
         "resources/OffMode.qml",
         "resources/Oscilloscope.qml",

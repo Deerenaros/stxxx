@@ -16,7 +16,7 @@ ChartView {
 
     ValueAxis {
         id: axisX
-        min: -1024
+        min: -256
         max: 0
     }
 
@@ -25,7 +25,7 @@ ChartView {
 
 
         onAmplifierSignal: {
-            axisX.min = -1024
+            axisX.min = -256
             axisX.max = 0
         }
     }

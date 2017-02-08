@@ -23,12 +23,39 @@ class DevicesModel
         : public QAbstractItemModel
 {
     Q_OBJECT
+#pragma pack(push, 1)
+    struct ReceiverHeader {
+        qint16 start;
+        qint16 stop;
+        qint16 mark;
+        qint8 step;
+        qint8 type;
+        qint8 oscFixed;
+        qint8 spcFixed;
+        qint8 amplify;
+        qint8 diffMode;
+        qint16 dt;
+        qint8 rate;
+        qint8 modeFrom;
+        qint8 detector;
+
+        enum {
+            AM, FM
+        };
+
+        enum {
+            US, MS
+        };
+    };
+#pragma pack(pop)
 
     static const int COLUMN_COUNT = 1;
     static const int AMPLIFIER_BYTE_SHIFT = 110;
     static const int SWITCH_MODE = 3;
+    static const int SWITCH_PACKETS_TO_RESET = -5;
+    static const int AMPLIFIER_LENGTH = 256;
+    const double SWITCH_ACDC_SCALE = 10.;
     const double BATTERY_SCALE = 100./5;
-
     const QMap<uint16_t, QString> SUPPORTED_PIDS = {
         { 0x6015, "ST300" }
     };
@@ -60,14 +87,19 @@ public:
 Q_SIGNALS:
 signals:
     void amplifierSignal(int count);
-    void switcherSignal(int input, int output, double ac, double dc);
+    void switcherSignal(int a, int b, double ac, double dc);
     void statusSignal(double charge, bool isCharging);
+    void dateSignal(int hours, int min, int year, int month, int day);
+    void fdrSignal(int what, int a, int b, int len, int level);
 
 public slots:
+    void closeAll();
     void setCurrent(int);
     void setModeForCurrent(char);
     void specifyModeForCurrent();
     void setSeries(QAbstractSeries*);
+
+    void setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8 day);
 
 protected:
     QHash<int, QByteArray> roleNames() const;
@@ -76,7 +108,10 @@ private slots:
     void _packetRX(Device*, QByteArray*);
 
 private:
-    QByteArray _nextSwitch(qint8 in, qint8 out);
+    bool _haveToContinueSwitch(QPair<qint8, qint8>);
+    QByteArray _nextSwitch(qint8, qint8);
+
+    void _specifyOnModeChange(char);
 
     void _toStatus(QByteArray&);
     void _toSwitch(QByteArray&);
@@ -86,7 +121,8 @@ private:
     void _toFDR(QByteArray&);
     void _toBattery(const QByteArray &);
 
-    QPair<quint8, quint8> m_waitingSwitch;
+    QPair<qint8, qint8> m_waitingSwitch;
+    int m_waitingReset = SWITCH_PACKETS_TO_RESET;
     int m_currentDevice = -1;
     char m_currentMode = 0x00;
     QVector<QPointF> m_amplifier;

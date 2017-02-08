@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.1
 Rectangle {
     id: switchItem
 
-    color: "black"
+    color: Qt.rgba(0.20784314,  0.21176471,  0.21568627, 1)
 
     Text {
         id: txt

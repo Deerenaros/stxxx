@@ -53,6 +53,8 @@ void Device::open() {
     ok &= m_port->setDataBits(QSerialPort::Data8);
     ok &= m_port->setFlowControl(QSerialPort::NoFlowControl);
 
+    this->start();
+
     m_mutex.unlock();
 }
 
@@ -139,7 +141,9 @@ void Device::run() {
                 if (step == 5) {
                     step = 0;
                     debug << DMark("read") << strBuf;
+                    m_mutex.lock();
                     emit packetRead(this, new QByteArray(buff));
+                    m_mutex.unlock();
                     buff.clear();
                     strBuf.clear();
                 }
@@ -202,9 +206,10 @@ void Device::run() {
 }
 
 void Device::close() {
-    m_mutex.lock();
-
-    m_port->close();
-
-    m_mutex.unlock();
+    if(this->isRunning()) {
+        m_mutex.lock();
+        m_port->close();
+        this->terminate();
+        m_mutex.unlock();
+    }
 }
