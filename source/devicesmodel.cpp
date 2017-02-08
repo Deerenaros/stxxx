@@ -245,9 +245,9 @@ void DevicesModel::_toFDR(QByteArray& bytes) {
         currentDevice().write(_nextSwitch(bytes[3], bytes[4]));
 
         if(bytes[2] > '\0') {
-            emit fdrSignal(bytes[1], bytes[3], bytes[4], *reinterpret_cast<qint16*>(bytes.data()+5), bytes[7]);
+            emit fdrSignal(bytes[1], bytes[3], bytes[4], *reinterpret_cast<quint16*>(bytes.data()+5) / 10., *reinterpret_cast<quint8*>(bytes.data() + 7));
             for(qint8 i = 1; i < bytes[2]; i++) {
-                emit fdrSignal(5, bytes[3], bytes[4], *reinterpret_cast<qint16*>(bytes.data() + 5 + i*3), bytes[7 + i*3]);
+                emit fdrSignal(5, bytes[3], bytes[4], *reinterpret_cast<quint16*>(bytes.data() + 5 + i*3) / 10., *reinterpret_cast<quint8*>(bytes.data() + 7 + i*3));
             }
         } else {
             emit fdrSignal(-1, bytes[3], bytes[4], 0, 0);

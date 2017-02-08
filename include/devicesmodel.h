@@ -90,7 +90,7 @@ signals:
     void switcherSignal(int a, int b, double ac, double dc);
     void statusSignal(double charge, bool isCharging);
     void dateSignal(int hours, int min, int year, int month, int day);
-    void fdrSignal(int what, int a, int b, int len, int level);
+    void fdrSignal(int what, int a, int b, double len, unsigned level);
 
 public slots:
     void closeAll();

@@ -5,9 +5,16 @@ import QtQuick.Layouts 1.1
 Item {
     id: fdr
 
+
     GridLayout {
         property var items: []
         property var last: null
+
+        property var diags: ["gray", "gray"]
+        property var heads: ["black", "black"]
+        property var pairs: ["tan", "wheat"]
+        property var others: ["silver", "gainsboro"]
+        property real maxlvl: 0.1
 
         id: results
 
@@ -38,16 +45,15 @@ Item {
                     var component = Qt.createComponent("FDRItem.qml")
                     if(component !== null && component.status === Component.Ready) {
                         var attrs = {
-                            text: "W.T.F?!",
-                            color: (isPair(c, r+1) ? "tan" : (r == c-1 ? "gray" : "silver")),
-                            textColor: "white",
+                            colors: (isPair(c, r+1) ? pairs : (r == c-1 ? diags : others)),
+                            textColor: "black",
                             "c": c,
                             "r": r,
                         }
 
                         if(c === 0 || r === 0) {
                             attrs.busy = false
-                            attrs.color = "black"
+                            attrs.colors = heads
                             attrs.textColor = "white"
                             attrs.clickable = false
 
@@ -76,38 +82,38 @@ Item {
         Connections {
             target: devicesModel
             onFdrSignal: {
-                if(b >= 2 && a >= 1) {
-                    switch(what) {
-                    case 5:
-                        results.items[b][a-1].measurments.push({"len": len, "level": level})
-                        return
-                    case 4:
-                        results.setContent(b, a, "Hi Noise")
-                        break
-                    case 3:
-                        results.setContent(b, a, "Hi Voltage")
-                        break
-                    case 2:
-                    case 1:
-                        results.items[b][a-1].measurments = [{"len": len, "level": level}]
-                        results.setContent(b, a, len + "m, " + level + "dB")
-                        break
-                    case 0:
-                        results.setContent(b, a, "...")
-                        break
-                    case -1:
-                        results.setContent(b, a, "No Signal")
-                        break
-                    }
-
-                    results.items[b][a-1].busy = false
-                    results.items[b][a-1].color = "red"
-                    if(results.last !== null &&  results.last !== results.items[b][a-1]) {
-                        results.last.color = "gray"
-                    }
-
-                    results.last = results.items[b][a-1]
+                switch(what) {
+                case 5:
+                    results.items[b][a-1].measurments.push({"len": len, "level": level})
+                    return
+                case 4:
+                    results.setContent(b, a, "Hi Noise")
+                    break
+                case 3:
+                    results.setContent(b, a, "Hi Voltage")
+                    break
+                case 2:
+                case 1:
+                    results.items[b][a-1].measurments = [{"len": len, "level": level}]
+                    results.setContent(b, a, len + "m, " + level + "dB")
+                    results.items[b][a-1].lvl = level
+                    results.maxlvl = (results.maxlvl > level ? results.maxlvl : level)
+                    break
+                case 0:
+                    results.setContent(b, a, "...")
+                    break
+                case -1:
+                    results.setContent(b, a, "No Signal")
+                    break
                 }
+
+                results.items[b][a-1].busy = false
+                // results.items[b][a-1].color = "red"
+                if(results.last !== null &&  results.last !== results.items[b][a-1]) {
+                    results.last.colors = (results.isPair(results.last.c, results.last.r+1) ? results.pairs : results.others)
+                }
+
+                results.last = results.items[b][a-1]
             }
         }
 

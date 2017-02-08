@@ -24,7 +24,7 @@ Item {
                     var component = Qt.createComponent("SwitchItem.qml")
                     if(component !== null && component.status === Component.Ready) {
                         var attrs = {
-                            text: (c+1) + " " + r,
+                            text: c + " " + (r+1),
 
                             color: "gray",
                             textColor: "black",
