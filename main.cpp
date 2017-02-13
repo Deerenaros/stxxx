@@ -6,20 +6,8 @@
 // TODO: Создание отчёта
 // TODO: лаааааааааааааааааааапшааааааааааааааааа
 
-#include <QApplication>
-#include <QQmlContext>
-#include <QQuickView>
-#include <QQmlEngine>
-#include <QDir>
-
-#include "devicesmodel.h"
+#include "application.h"
 #include "betterdebug.h"
-
-#ifdef Q_OS_WIN
-    #define IMPORT_PATH "%1/../../../../%2"
-#else
-    #define IMPORT_PATH "%1/../../../%2"
-#endif
 
 void qBetterDebug(QtMsgType type, const QMessageLogContext &context, const QString &_dbg) {
     QString dbg = _dbg;
@@ -86,20 +74,6 @@ void qBetterDebug(QtMsgType type, const QMessageLogContext &context, const QStri
 int main(int argc, char *argv[]) {
     qInstallMessageHandler(qBetterDebug);
 
-    QApplication app(argc, argv);
-
-    QQuickView viewer;
-    DevicesModel model(&viewer);
-    QString extraImportPath = QString(IMPORT_PATH).arg(QGuiApplication::applicationDirPath(), QString::fromLatin1("qml"));
-    viewer.engine()->addImportPath(extraImportPath);
-    QObject::connect(viewer.engine(), &QQmlEngine::quit, &viewer, &QWindow::close);
-    viewer.rootContext()->setContextProperty("devicesModel", &model);
-    viewer.setTitle(QStringLiteral("QML Chart"));
-    viewer.setSource(QUrl("qrc:/resources/main.qml"));
-    viewer.setResizeMode(QQuickView::SizeRootObjectToView);
-    viewer.show();
-
-    QObject::connect(&app, &QApplication::aboutToQuit, &model, &DevicesModel::closeAll);
-
+    Application app(argc, argv);
     return app.exec();
 }

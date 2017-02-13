@@ -15,5 +15,8 @@
         <file>resources/StatusBar.qml</file>
         <file>resources/FDRItem.qml</file>
         <file>resources/FDRItems.qml</file>
+        <file>resources/PinSelector.qml</file>
+        <file>resources/images/st300.jpg</file>
+        <file>resources/Pin.qml</file>
     </qresource>
 </RCC>

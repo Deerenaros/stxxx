@@ -1,5 +1,6 @@
 import QtQuick 2.0
 
-Rectangle {
-    color: "darkgray"
+Image {
+    source: "images/st300.jpg"
+    fillMode: Image.PreserveAspectFit
 }
