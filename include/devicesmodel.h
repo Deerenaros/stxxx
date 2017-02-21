@@ -103,6 +103,7 @@ signals:
 public slots:
     void closeAll();
     void setCurrent(int);
+    void retake();
     void setAuto(bool);
     void setModeForCurrent(char);
     void specifyModeForCurrent();

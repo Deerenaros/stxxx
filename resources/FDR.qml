@@ -54,27 +54,6 @@ Item {
             Layout.row: 1
         }
 
-        Connections {
-            target: devicesModel
-            onFdrSignal: {
-                switch(what) {
-                case 5:
-                    return
-                case 4:
-                    break
-                case 3:
-                    break
-                case 2:
-                case 1:
-                    break
-                case 0:
-                    break
-                case -1:
-                    break
-                }
-            }
-        }
-
         function onAutomateSet(a, b, content) {
             devicesModel.automate = false
 

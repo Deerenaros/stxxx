@@ -76,7 +76,7 @@ Item {
         anchors.fill: parent
 
         onClicked: {
-            devicesModel.automate = false
+            devicesModel.automate = !devicesModel.automate
         }
     }
 }

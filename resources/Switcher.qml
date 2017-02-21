@@ -5,7 +5,7 @@ import QtQuick.Controls 1.4
 Item {
     GridLayout {
         property var items: [];
-        property var last: null;
+        property var selected: null;
 
         id: switcher
 
@@ -18,20 +18,23 @@ Item {
         columns: 8
 
         Component.onCompleted: {
-            for(var c = 0; c < switcher.rows; c++) {
+            for(var c = 0; c < switcher.columns; c++) {
                 items.push([])
-                for(var r = 0; r < switcher.columns; r++) {
+                for(var r = 0; r < switcher.rows; r++) {
                     var component = Qt.createComponent("SwitchItem.qml")
                     if(component !== null && component.status === Component.Ready) {
                         var attrs = {
-                            text: c + " " + (r+1),
+                            text: (r+1 > c ? c + " " + (r+1) : "#"),
+                            i: c, j: r+1,
+                            clickable: c != 0 && r != 0 && r+1 > c,
+                            selected: false,
 
-                            color: "gray",
+                            bg: "gray",
                             textColor: "black",
                         }
 
                         if(c === 0 || r === 0) {
-                            attrs.color = "black"
+                            attrs.bg = "black"
                             attrs.textColor = "white"
 
                             if(c === 0 && r === 0) {
@@ -55,12 +58,7 @@ Item {
             target: devicesModel
             onSwitcherSignal: {
                 switcher.items[a][b-1].text = ac + "/" + dc
-                switcher.items[a][b-1].color = "red"
-                if(switcher.last != null) {
-                    switcher.last.color = "gray"
-                }
-
-                switcher.last = switcher.items[a][b-1]
+                // switcher.items[a][b-1].toggle()
             }
         }
     }

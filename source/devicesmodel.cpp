@@ -110,6 +110,10 @@ void DevicesModel::setCurrent(int current) {
     }
 }
 
+void DevicesModel::retake() {
+    currentDevice().write(QByteArray("R\x07"));
+}
+
 void DevicesModel::setModeForCurrent(char mode) {
     if(mode) {
         if(!currentDevice().isReady()) {
@@ -194,6 +198,10 @@ QByteArray DevicesModel::_nextSwitch(qint8 a, qint8 b) {
 
 void DevicesModel::_specifyOnModeChange(char mode) {
     switch(mode) {
+    case 2:
+        m_auto = true;
+        setPins(1, 2);
+        break;
     case 5:
         currentDevice().write(QByteArray("S\x0c\x01", 3));
         break;
@@ -232,11 +240,12 @@ void DevicesModel::_toSwitch(QByteArray& bytes) {
 
     debug << DMark("switch") << QString("dc: %1 ac: %2 in: %3 out: %4").arg(dc).arg(ac).arg(input).arg(output);
 
-    if(_haveToContinueSwitch(QPair<qint8, qint8>(input, output))) {
+    emit switcherSignal(input, output, ac, dc);
+
+    if(m_auto && _haveToContinueSwitch(QPair<qint8, qint8>(input, output))) {
         currentDevice().write(_nextSwitch(input, output));
         m_waitingReset = SWITCH_PACKETS_TO_RESET;
-        emit switcherSignal(input, output, ac, dc);
-    } else {
+    } else if(m_auto) {
         m_waitingReset += 1;
     }
 }
@@ -280,8 +289,10 @@ void DevicesModel::_toFDR(QByteArray& bytes) {
         }
 
         if(bytes[2] > '\0') {
+            debug << DMark("fdr") << bytes[3] << " " << bytes[4] << *reinterpret_cast<quint16*>(bytes.data()+5) / 10. << " " <<  *reinterpret_cast<quint8*>(bytes.data() + 7);
             emit fdrSignal(bytes[1], bytes[3], bytes[4], *reinterpret_cast<quint16*>(bytes.data()+5) / 10., *reinterpret_cast<quint8*>(bytes.data() + 7));
             for(qint8 i = 1; i < bytes[2]; i++) {
+                debug << DMark("fdr") << bytes[3] << " " << bytes[4] << *reinterpret_cast<quint16*>(bytes.data()+5+i*3) / 10. << " " <<  *reinterpret_cast<quint8*>(bytes.data() + 7+i*3);
                 emit fdrSignal(5, bytes[3], bytes[4], *reinterpret_cast<quint16*>(bytes.data() + 5 + i*3) / 10., *reinterpret_cast<quint8*>(bytes.data() + 7 + i*3));
             }
         } else {

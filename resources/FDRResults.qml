@@ -8,6 +8,7 @@ Item {
 
     property string header: ""
     property bool active: false
+    property bool busy: false
 
     Layout.fillWidth: true
     Layout.fillHeight: true
@@ -21,7 +22,7 @@ Item {
             Layout.preferredHeight: 25
             Layout.fillWidth: true
             Text {
-                text: header
+                text: (busy ? "..." : header)
                 font.bold: active
 
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -35,6 +36,7 @@ Item {
                             active = true
                             resultsRoot.parent.currentSet.active = false
                             resultsRoot.parent.currentSet = resultsRoot
+                            devicesModel.retake()
                         }
                     }
                 }
@@ -97,11 +99,13 @@ Item {
                     if(active) {
                         switch(what) {
                         case 0:
+                            busy = true
                             resultModel.clear()
                             break
                         case 1:
                         case 2:
                         case 5:
+                            busy = false
                             resultModel.append({
                                 "n": (results.model.count+1).toString(),
                                 "lvl": lvl.toString(),
