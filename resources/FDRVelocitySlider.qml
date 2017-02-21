@@ -18,13 +18,38 @@ Item {
             value: 1.25
             minimumValue: 0.3
             maximumValue: 3.1
+
+            onPressedChanged: {
+                if(!pressed) {
+                    devicesModel.setVelocityFactor(value >= 1 ? value : 1.0/value)
+                }
+            }
+
+            onValueChanged: {
+                if(!pressed) {
+                    devicesModel.setVelocityFactor(value >= 1 ? value : 1.0/value)
+                }
+
+                spin.value = value
+            }
         }
 
-        Text {
+        SpinBox {
+            id: spin
+
             Layout.fillHeight: true
             Layout.preferredWidth: 50
 
-            text: slider.value.toString().substring(0, 4)
+            value: 1.25
+            decimals: 2
+            stepSize: 0.01
+
+            minimumValue: 0.3
+            maximumValue: 3.1
+
+            onValueChanged: {
+                slider.value = value
+            }
         }
     }
 }

@@ -6,6 +6,7 @@
 #include <QAbstractItemModel>
 #include <QMap>
 #include <QPair>
+#include <QThread>
 
 #include <QAbstractSeries>
 #include <QXYSeries>
@@ -61,6 +62,7 @@ class DevicesModel
     };
 
     Q_PROPERTY(int current READ getCurrent WRITE setCurrent NOTIFY currentChanged)
+    Q_PROPERTY(bool automate READ getAuto WRITE setAuto NOTIFY autoChanged)
     Q_PROPERTY(bool isReady READ getReady)
     Q_PROPERTY(int count READ getCount NOTIFY countChanged)
 
@@ -82,6 +84,7 @@ public:
     Device& currentDevice();
     int getCurrent() const;
     bool getReady() const;
+    bool getAuto() const;
     int getCount() const;
 
 Q_SIGNALS:
@@ -90,14 +93,22 @@ signals:
     void switcherSignal(int a, int b, double ac, double dc);
     void statusSignal(double charge, bool isCharging);
     void dateSignal(int hours, int min, int year, int month, int day);
-    void fdrSignal(int what, int a, int b, double len, unsigned level);
+    void fdrSignal(int what, int a, int b, double len, unsigned lvl);
+    void pinsChanged(int a, int b);
+
+    int currentChanged();
+    void countChanged();
+    void autoChanged();
 
 public slots:
     void closeAll();
     void setCurrent(int);
+    void setAuto(bool);
     void setModeForCurrent(char);
     void specifyModeForCurrent();
     void setSeries(QAbstractSeries*);
+    void setPins(int, int);
+    void setVelocityFactor(double factor);
 
     void setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8 day);
 
@@ -130,9 +141,7 @@ private:
     QXYSeries *m_series = nullptr;
     QList<Device*> m_devices;
 
-signals:
-    int currentChanged();
-    void countChanged();
+    bool m_auto = false;
 };
 
 #endif // DEVICESMODEL_H

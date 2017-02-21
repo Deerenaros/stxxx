@@ -22,5 +22,6 @@
         <file>resources/FDRResults.qml</file>
         <file>resources/FDRVelocitySlider.qml</file>
         <file>resources/FDRAutomate.qml</file>
+        <file>resources/MultiText.qml</file>
     </qresource>
 </RCC>

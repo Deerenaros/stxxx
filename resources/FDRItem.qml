@@ -6,21 +6,33 @@ import QtGraphicalEffects 1.0
 Item {
     id: switchItem
 
-    property string text: ""
+    property real len: 0
+    property real lvl: 0
+    property int first: 0
+    property int second: 0
+
     property string textColor: "black"
-    property bool busy: true
-    property bool clickable: true
-    property int c: 0
-    property int r: 0
+    property bool busy: false
     property var measurments: []
-    property var colors: ["tan", "wheat"]
-    property real lvl: 0.0
+    property var colors: ["silver", "gainsboro"]
+    property var pairColors: ["tan", "wheat"]
     property real g: lvl/parent.maxlvl
 
     Layout.fillHeight: true
     Layout.fillWidth: true
-    Layout.columnSpan: 1
-    Layout.rowSpan: 1
+
+    function isPair(a, b) {
+        return (a === 1 && b === 2)
+            || (a === 3 && b === 6)
+            || (a === 4 && b === 5)
+            || (a === 7 && b === 8)
+    }
+
+    Component.onCompleted: {
+        if(isPair(first, second)) {
+            colors = pairColors
+        }
+    }
 
     LinearGradient {
         anchors.fill: parent
@@ -34,12 +46,12 @@ Item {
             }
 
             GradientStop {
-                position: (g >= 0.99 ? 0.999 : g)
+                position: Math.min(0.99, g)
                 color: switchItem.colors[0]
             }
 
             GradientStop {
-                position: (g >= 0.99 ? 1 : g + 0.001)
+                position: Math.min(0.999, g + 0.001)
                 color: switchItem.colors[1]
             }
 
@@ -50,11 +62,12 @@ Item {
         }
     }
 
-    Text {
+    MultiText {
         id: txt
 
-        text: parent.text
-        color: parent.textColor
+        vAlignment: Text.Center
+        text: (busy ? "..." : first + "-" + second + "\n" + len + "m, " + lvl + "dB")
+        color: textColor
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
     }
@@ -63,9 +76,7 @@ Item {
         anchors.fill: parent
 
         onClicked: {
-            if(clickable) {
-                parent.parent.onMouseChoose(c, r)
-            }
+            devicesModel.automate = false
         }
     }
 }

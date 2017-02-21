@@ -54,13 +54,13 @@ Item {
         Connections {
             target: devicesModel
             onSwitcherSignal: {
-                switcher.items[b][a-1].text = ac + "/" + dc
-                switcher.items[b][a-1].color = "red"
+                switcher.items[a][b-1].text = ac + "/" + dc
+                switcher.items[a][b-1].color = "red"
                 if(switcher.last != null) {
                     switcher.last.color = "gray"
                 }
 
-                switcher.last = switcher.items[b][a-1]
+                switcher.last = switcher.items[a][b-1]
             }
         }
     }

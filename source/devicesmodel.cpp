@@ -82,8 +82,15 @@ int DevicesModel::getCount() const {
     return m_devices.count();
 }
 
+bool DevicesModel::getAuto() const {
+    return m_auto;
+}
+
 bool DevicesModel::getReady() const {
-    return m_devices[m_currentDevice]->isReady();
+    return m_currentDevice >= 0
+        && m_currentDevice < m_devices.size()
+        && m_devices[m_currentDevice] != nullptr
+        && m_devices[m_currentDevice]->isReady();
 }
 
 void DevicesModel::closeAll() {
@@ -97,8 +104,10 @@ Device& DevicesModel::currentDevice() {
 }
 
 void DevicesModel::setCurrent(int current) {
-    m_currentDevice = current;
-    emit currentChanged();
+    if(m_currentDevice != current) {
+        m_currentDevice = current;
+        emit currentChanged();
+    }
 }
 
 void DevicesModel::setModeForCurrent(char mode) {
@@ -127,12 +136,32 @@ void DevicesModel::setSeries(QAbstractSeries* series) {
     m_series = static_cast<QXYSeries*>(series);
 }
 
+void DevicesModel::setPins(int a, int b) {
+    char buff[] = {'I', char(1), char(a), char(b)};
+    currentDevice().write(QByteArray(buff, 4));
+}
+
 void DevicesModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8 day) {
     char time[] = {'T', 1, hours, min};
     char date[] = {'T', 2, day, month, year};
 
     currentDevice().write(QByteArray(time, 4));
     currentDevice().write(QByteArray(date, 5));
+}
+
+void DevicesModel::setAuto(bool automate) {
+    if(automate != m_auto) {
+        m_auto = automate;
+        currentDevice().write(_nextSwitch(0, 0));
+        emit autoChanged();
+    }
+}
+
+void DevicesModel::setVelocityFactor(double factor) {
+    if(m_currentDevice > m_devices.size() && currentDevice().isReady()) {
+        char buff[] = {'F', 1, char(factor), char(100*(factor-quint8(factor)))};
+        currentDevice().write(QByteArray(buff, 4));
+    }
 }
 
 QHash<int, QByteArray> DevicesModel::roleNames() const {
@@ -142,24 +171,24 @@ QHash<int, QByteArray> DevicesModel::roleNames() const {
     return roles;
 }
 
-QByteArray DevicesModel::_nextSwitch(qint8 in, qint8 out) {
-    if(in == 0 || out == 0) {
-        out = 1;
-        in = 2;
-    } else if(in >= 8) {
-        out += 1;
-        in = out+1;
+QByteArray DevicesModel::_nextSwitch(qint8 a, qint8 b) {
+    if(b == 0 || a == 0) {
+        a = 1;
+        b = 2;
+    } else if(b >= 8) {
+        a += 1;
+        b = a+1;
     } else {
-        in += 1;
+        b += 1;
     }
 
-    if(out > 7) {
-        out = 1;
-        in = 2;
+    if(a > 7) {
+        a = 1;
+        b = 2;
     }
 
-    char buff[] = {'I', 1, in, out};
-    m_waitingSwitch = QPair<qint8, qint8>(in, out);
+    char buff[] = {'I', 1, a, b};
+    m_waitingSwitch = QPair<qint8, qint8>(a, b);
     return QByteArray(buff, 4);
 }
 
@@ -173,6 +202,9 @@ void DevicesModel::_specifyOnModeChange(char mode) {
 
 void DevicesModel::_toStatus(QByteArray& bytes) {
     _toBattery(bytes.mid(5, 3));
+
+    emit pinsChanged(bytes[2], bytes[3]);
+
     switch(bytes[1]) {
     case 1:
         emit dateSignal(bytes[8], bytes[9], bytes[10], bytes[11], bytes[12]);
@@ -242,7 +274,10 @@ void DevicesModel::_toNLD(QByteArray& bytes) {
 
 void DevicesModel::_toFDR(QByteArray& bytes) {
     if(bytes[1] != '\0') {
-        currentDevice().write(_nextSwitch(bytes[3], bytes[4]));
+        if(m_auto && bytes[3] != 7 && bytes[4] != 8) {
+            currentDevice().write(_nextSwitch(bytes[3], bytes[4]));
+            emit pinsChanged(m_waitingSwitch.first, m_waitingSwitch.second);
+        }
 
         if(bytes[2] > '\0') {
             emit fdrSignal(bytes[1], bytes[3], bytes[4], *reinterpret_cast<quint16*>(bytes.data()+5) / 10., *reinterpret_cast<quint8*>(bytes.data() + 7));

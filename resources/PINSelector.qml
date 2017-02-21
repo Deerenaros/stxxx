@@ -3,7 +3,8 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 
 Item {
-    property var pins: [];
+    property var pins: []
+    property var selected: null
 
     Layout.fillWidth: true
     Layout.fillHeight: true
@@ -49,7 +50,19 @@ Item {
         }
     }
 
+    Connections {
+        target: devicesModel
+
+        onPinsChanged: {
+            if(get(a, b)) {
+                get(a, b).select()
+            }
+        }
+    }
+
     function get(i, j) {
-        return pins[i-1][j-1];
+        if(pins[i-1] && pins[i-1][j-i-1]) {
+            return pins[i-1][j-i-1];
+        } return null;
     }
 }

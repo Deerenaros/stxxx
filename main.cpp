@@ -1,10 +1,13 @@
-//#define DEBUG_TO_STD
+#define DEBUG_TO_STD
 #define DEBUG_TO_NET
 
 // TODO: Рефлектометр/нелинейник
 // TODO: Сохранение результатов
 // TODO: Создание отчёта
 // TODO: лаааааааааааааааааааапшааааааааааааааааа
+
+// #include <QtPlugin>
+// Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 
 #include "application.h"
 #include "betterdebug.h"
@@ -72,8 +75,7 @@ void qBetterDebug(QtMsgType type, const QMessageLogContext &context, const QStri
 
 
 int main(int argc, char *argv[]) {
-    qInstallMessageHandler(qBetterDebug);
-
+    // qInstallMessageHandler(qBetterDebug);
     Application app(argc, argv);
     return app.exec();
 }

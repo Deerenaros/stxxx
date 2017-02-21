@@ -4,10 +4,17 @@ import QtQuick.Controls 1.4
 
 
 Item {
+    id: resultsRoot
+
     property string header: ""
+    property bool active: false
 
     Layout.fillWidth: true
     Layout.fillHeight: true
+
+    ListModel {
+        id: resultModel
+    }
 
     ColumnLayout {
         Rectangle {
@@ -15,9 +22,22 @@ Item {
             Layout.fillWidth: true
             Text {
                 text: header
+                font.bold: active
 
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    onClicked: {
+                        if(!active) {
+                            active = true
+                            resultsRoot.parent.currentSet.active = false
+                            resultsRoot.parent.currentSet = resultsRoot
+                        }
+                    }
+                }
             }
         }
 
@@ -30,36 +50,68 @@ Item {
                 role: "n"
                 title: qsTr("NN")
                 width: results.width/5 - 1
+                delegate: Item {
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        color: styleData.textColor
+                        elide: styleData.elideMode
+                        text: "#" + styleData.value
+                    }
+                }
             }
             TableViewColumn {
                 role: "len"
                 title: qsTr("Length")
                 width: 2*results.width/5 - 1
+                delegate: Item {
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        color: styleData.textColor
+                        elide: styleData.elideMode
+                        text: styleData.value + "m"
+                    }
+                }
             }
             TableViewColumn {
                 role: "lvl"
                 title: qsTr("Signal Level")
                 width: 2*results.width/5 - 1
-            }
-
-            model: ListModel {
-                ListElement {
-                    n: "#1"
-                    len: "100m"
-                    lvl: "40db"
+                delegate: Item {
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        color: styleData.textColor
+                        elide: styleData.elideMode
+                        text: styleData.value + "dB"
+                    }
                 }
             }
 
-            itemDelegate: Item {
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    color: styleData.textColor
-                    elide: styleData.elideMode
-                    text: styleData.value
+            model: resultModel
+
+            Connections {
+                target: devicesModel
+                onFdrSignal: {
+                    if(active) {
+                        switch(what) {
+                        case 0:
+                            resultModel.clear()
+                            break
+                        case 1:
+                        case 2:
+                        case 5:
+                            resultModel.append({
+                                "n": (results.model.count+1).toString(),
+                                "lvl": lvl.toString(),
+                                "len": len.toString(),
+                            })
+                            break
+                        }
+                    }
                 }
             }
         }
     }
-
 }

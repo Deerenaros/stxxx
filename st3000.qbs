@@ -18,6 +18,7 @@ CppApplication {
         "resources/FDRResults.qml",
         "resources/FDRSignalPreview.qml",
         "resources/FDRVelocitySlider.qml",
+        "resources/MultiText.qml",
         "resources/NLD.qml",
         "resources/OffMode.qml",
         "resources/Oscilloscope.qml",
@@ -49,4 +50,5 @@ CppApplication {
     }
 
     cpp.includePaths: ["./include"]
+    // cpp.staticLibraries: ["Qt5PlatformSupport", "opengl32", "qwindows", "imm32", "winmm", "Ws2_32"]
 }

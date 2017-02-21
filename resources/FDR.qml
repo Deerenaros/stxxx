@@ -9,6 +9,8 @@ Item {
     GridLayout {
         id: results
 
+        property var currentSet: firstSet
+
         anchors.fill: parent
 
         columnSpacing: 15
@@ -23,13 +25,18 @@ Item {
         }
 
         FDRResults {
+            id: firstSet
+
             header: "first set"
+            active: true
 
             Layout.column: 1
             Layout.row: 0
         }
 
         FDRResults {
+            id: secondSet
+
             header: "second set"
 
             Layout.column: 2
@@ -68,7 +75,10 @@ Item {
             }
         }
 
-        function setContent(a, b, content) {
+        function onAutomateSet(a, b, content) {
+            devicesModel.automate = false
+
+            firstSet.resultModel.clear()
         }
     }
 
