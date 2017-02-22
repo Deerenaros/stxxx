@@ -18,10 +18,10 @@
         <file>resources/PinSelector.qml</file>
         <file>resources/images/st300.jpg</file>
         <file>resources/Pin.qml</file>
-        <file>resources/FDRSignalPreview.qml</file>
         <file>resources/FDRResults.qml</file>
-        <file>resources/FDRVelocitySlider.qml</file>
         <file>resources/FDRAutomate.qml</file>
         <file>resources/MultiText.qml</file>
+        <file>resources/FDRSignal.qml</file>
+        <file>resources/FDRControls.qml</file>
     </qresource>
 </RCC>

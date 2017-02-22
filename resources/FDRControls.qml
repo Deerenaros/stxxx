@@ -15,7 +15,7 @@ Item {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            value: 1.25
+            value: 1.5
             minimumValue: 0.3
             maximumValue: 3.1
 
@@ -40,7 +40,7 @@ Item {
             Layout.fillHeight: true
             Layout.preferredWidth: 50
 
-            value: 1.25
+            value: 1.5
             decimals: 2
             stepSize: 0.01
 

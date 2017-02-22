@@ -3,6 +3,7 @@
 
 #include <QAreaSeries>
 #include <QQuickView>
+#include <QList>
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -162,7 +163,7 @@ void DevicesModel::setAuto(bool automate) {
 }
 
 void DevicesModel::setVelocityFactor(double factor) {
-    if(m_currentDevice > m_devices.size() && currentDevice().isReady()) {
+    if(m_currentDevice >= 0 && m_currentDevice < m_devices.size() && currentDevice().isReady()) {
         char buff[] = {'F', 1, char(factor), char(100*(factor-quint8(factor)))};
         currentDevice().write(QByteArray(buff, 4));
     }
@@ -283,18 +284,30 @@ void DevicesModel::_toNLD(QByteArray& bytes) {
 
 void DevicesModel::_toFDR(QByteArray& bytes) {
     if(bytes[1] != '\0') {
-        if(m_auto && bytes[3] != 7 && bytes[4] != 8) {
+        if(m_auto && bytes[3] != char(7) && bytes[4] != char(8)) {
             currentDevice().write(_nextSwitch(bytes[3], bytes[4]));
             emit pinsChanged(m_waitingSwitch.first, m_waitingSwitch.second);
         }
 
         if(bytes[2] > '\0') {
-            debug << DMark("fdr") << bytes[3] << " " << bytes[4] << *reinterpret_cast<quint16*>(bytes.data()+5) / 10. << " " <<  *reinterpret_cast<quint8*>(bytes.data() + 7);
-            emit fdrSignal(bytes[1], bytes[3], bytes[4], *reinterpret_cast<quint16*>(bytes.data()+5) / 10., *reinterpret_cast<quint8*>(bytes.data() + 7));
-            for(qint8 i = 1; i < bytes[2]; i++) {
-                debug << DMark("fdr") << bytes[3] << " " << bytes[4] << *reinterpret_cast<quint16*>(bytes.data()+5+i*3) / 10. << " " <<  *reinterpret_cast<quint8*>(bytes.data() + 7+i*3);
-                emit fdrSignal(5, bytes[3], bytes[4], *reinterpret_cast<quint16*>(bytes.data() + 5 + i*3) / 10., *reinterpret_cast<quint8*>(bytes.data() + 7 + i*3));
+            QList<QPair<double, int>> list;
+            int a = bytes[3], b = bytes[4];
+
+            for(qint8 i = 0; i < bytes[2]; i++) {
+                list << QPair<double, int>(
+                            *reinterpret_cast<quint16*>(bytes.data() + 5 + i*3) / 10.,
+                            *reinterpret_cast<quint8*>(bytes.data() + 7 + i*3));
             }
+
+            for(auto &item: list) {
+                emit fdrSignal(1, a, b, item.first, item.second);
+            }
+
+            qSort(list.begin(), list.end(), [](QPair<double, int> a, QPair<double, int> b) {
+                return a.second > b.second;
+            });
+
+            emit fdrSignal(2, a, b, list.first().first, list.first().second);
         } else {
             emit fdrSignal(-1, bytes[3], bytes[4], 0, 0);
         }

@@ -103,8 +103,6 @@ Item {
                             resultModel.clear()
                             break
                         case 1:
-                        case 2:
-                        case 5:
                             busy = false
                             resultModel.append({
                                 "n": (results.model.count+1).toString(),

@@ -51,12 +51,13 @@ Window {
                 get(a, b).measurments = []
                 break
             case 1:
+                get(a, b).measurments.push({"lvl": lvl, "len": len})
+                break
+            case 2:
+                pinslayout.maxlvl = Math.max(pinslayout.maxlvl, lvl)
                 get(a, b).busy = false
                 get(a, b).lvl = lvl
                 get(a, b).len = len
-            case 5:
-                pinslayout.maxlvl = Math.max(pinslayout.maxlvl, lvl)
-                get(a, b).measurments.push({"lvl": lvl, "len": len})
                 break
             }
 

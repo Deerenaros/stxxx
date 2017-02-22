@@ -19,39 +19,40 @@ Item {
         rows: 2
         columns: 4
 
-        PinSelector {
-            Layout.column: 0
-            Layout.row: 0
-        }
-
         FDRResults {
             id: firstSet
 
-            header: "first set"
+            header: qsTr("SET #1")
             active: true
 
-            Layout.column: 1
+            Layout.column: 0
             Layout.row: 0
         }
 
         FDRResults {
             id: secondSet
 
-            header: "second set"
+            header: qsTr("SET #2")
 
-            Layout.column: 2
+            Layout.column: 1
             Layout.row: 0
         }
 
-        FDRSignalPreview {
-            Layout.column: 3
-            Layout.row: 0
-        }
-
-        FDRVelocitySlider {
+        FDRControls {
             Layout.column: 0
             Layout.columnSpan: 4
             Layout.row: 1
+        }
+
+        FDRSignal {
+            Layout.column: 0
+            Layout.columnSpan: 4
+            Layout.row: 1
+        }
+
+        PinSelector {
+            Layout.column: 3
+            Layout.row: 0
         }
 
         function onAutomateSet(a, b, content) {
