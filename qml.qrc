@@ -23,5 +23,6 @@
         <file>resources/MultiText.qml</file>
         <file>resources/FDRSignal.qml</file>
         <file>resources/FDRControls.qml</file>
+        <file>resources/TabBtn.qml</file>
     </qresource>
 </RCC>

@@ -17,10 +17,9 @@ Item {
 
             flow: GridLayout.TopToBottom
 
-            rows: 14
+            rows: 28+8
 
             rowSpacing: 1
-            columnSpacing: 1
 
             Component.onCompleted: {
                 for(var i = 1; i <= 7; i++) {
@@ -34,17 +33,15 @@ Item {
                         }
                     }
                 }
-            }
-        }
 
-        Button {
-            text: "Button"
-
-            onClicked: {
-                if(parent.parent.parent.parent.automate) {
-                    parent.parent.parent.parent.automate();
-                } else {
-                    console.debug("automate does not exist in " + parent.parent.parent.parent + " (" + automate + ")")
+                pins.push([])
+                for(var i = 1; i <= 8; i++) {
+                    var component = Qt.createComponent("Pin.qml")
+                    if(component !== null && component.status === Component.Ready) {
+                        pins[pins.length-1].push(component.createObject(pinslayout, {first: i, second: 9, usable: false}))
+                    } else if(component !== null && component.status === Component.Error) {
+                        console.debug(component.errorString())
+                    }
                 }
             }
         }

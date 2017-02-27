@@ -8,29 +8,98 @@ GridLayout {
     columnSpacing: 0
     rowSpacing: 0
 
-    rows: 3
-    columns: 1
+    rows: 2
+    columns: 2
 
-    property var openedDevices: createArray(devicesModel.count, 0)
+    Rectangle {
+        color: "white"
+        z: 100500
+
+        Layout.bottomMargin: 0
+        Layout.fillHeight: true
+        Layout.preferredWidth: 130
+        Layout.column: 0
+        Layout.columnSpan: 1
+        Layout.row: 0
+        Layout.rowSpan: 2
+
+        ListView {
+            id: bar
+            x: 5
+            y: 50
+            width: parent.width - 10
+            height: parent.height - 100
+
+            interactive: false
+
+            currentIndex: tabs.currentIndex
+
+            VisualItemModel {
+                id: vimodel
+
+                TabBtn {
+                    index: 0
+                    text: qsTr("OFFLINE")
+                }
+
+                TabBtn {
+                    index: 1
+                    text: qsTr("Settings")
+                }
+
+                TabBtn {
+                    index: 2
+                    text: qsTr("Switch")
+                }
+
+                TabBtn {
+                    index: 3
+                    text: qsTr("Amplifier")
+                }
+
+                TabBtn {
+                    index: 4
+                    text: qsTr("Receiver")
+                }
+
+                TabBtn {
+                    index: 5
+                    text: qsTr("NLD")
+                }
+
+                TabBtn {
+                    index: 6
+                    text: qsTr("FDR")
+                }
+
+                TabBtn {
+                    index: 7
+                    text: qsTr("Report")
+                }
+
+                TabBtn {
+                    index: -1
+                    text: qsTr("To Report")
+                }
+            }
+
+            model: vimodel
+        }
+    }
 
     SwipeView {
         id: tabs
+
+        interactive: false
 
         Layout.fillHeight: true
         Layout.fillWidth: true
         Layout.column: 1
         Layout.columnSpan: 1
-        Layout.row: 1
-        Layout.rowSpan: 1
+        Layout.row: 0
+        Layout.rowSpan: 2
 
-        focus: false
-        focusPolicy: Qt.NoFocus
         currentIndex: bar.currentIndex
-
-        onCurrentIndexChanged: {
-            openedDevices[devicesModel.current] = currentIndex
-            devicesModel.setModeForCurrent(currentIndex)
-        }
 
         OffMode {
         }
@@ -52,70 +121,8 @@ GridLayout {
 
         FDR {
         }
-    }
 
-    TabBar {
-        id: bar
-
-        Layout.bottomMargin: 0
-        Layout.preferredHeight: 40
-        Layout.fillWidth: true
-        Layout.column: 1
-        Layout.columnSpan: 1
-        Layout.row: 2
-        Layout.rowSpan: 1
-
-        currentIndex: tabs.currentIndex
-
-        TabButton {
-            text: qsTr("OFFLINE")
+        NLD {
         }
-
-        TabButton {
-            text: qsTr("Settings")
-        }
-
-        TabButton {
-            text: qsTr("Switch")
-        }
-
-        TabButton {
-            text: qsTr("Amplifier")
-        }
-
-        TabButton {
-            text: qsTr("Receiver")
-        }
-
-        TabButton {
-            text: qsTr("NLD")
-        }
-
-        TabButton {
-            text: qsTr("FDR")
-        }
-    }
-
-    StatusBar {
-        Layout.topMargin: 0
-        Layout.preferredHeight: 25
-        Layout.fillWidth: true
-
-        Layout.column: 1
-        Layout.columnSpan: 1
-        Layout.row: 3
-        Layout.rowSpan: 1
-    }
-
-    function createArray(len, item) {
-        var arr = [];
-        for(var i = 0; i < len; i++) {
-            arr.push(item)
-        }
-        return arr;
-    }
-
-    function myChangeIndex(index) {
-        bar.currentIndex = openedDevices[index];
     }
 }

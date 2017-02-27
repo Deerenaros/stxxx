@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtCharts 2.1
 
 Item {
-    id: placeholder
+    id: nld
 
     ChartView {
         title: "Line"

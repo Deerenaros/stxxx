@@ -39,20 +39,20 @@ Item {
         }
 
         FDRControls {
-            Layout.column: 0
-            Layout.columnSpan: 4
-            Layout.row: 1
+            Layout.column: 2
+            Layout.row: 0
         }
 
         FDRSignal {
             Layout.column: 0
-            Layout.columnSpan: 4
+            Layout.columnSpan: 3
             Layout.row: 1
         }
 
         PinSelector {
             Layout.column: 3
             Layout.row: 0
+            Layout.rowSpan: 2
         }
 
         function onAutomateSet(a, b, content) {
@@ -62,7 +62,7 @@ Item {
         }
     }
 
-    function automate() {
+    function toggleAuto() {
         var component = Qt.createComponent("FDRAutomate.qml");
         if(component !== null && component.status === Component.Ready) {
             win = component.createObject(fdr);
