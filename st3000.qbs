@@ -6,6 +6,7 @@ CppApplication {
         "include/betterdebug.h",
         "include/device.h",
         "include/devicesmodel.h",
+        "include/packets.h",
         "main.cpp",
         "qml.qrc",
         "source/application.cpp",

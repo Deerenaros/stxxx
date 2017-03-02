@@ -12,6 +12,7 @@
 #include <QXYSeries>
 
 #include "device.h"
+#include "packets.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -24,31 +25,6 @@ class DevicesModel
         : public QAbstractItemModel
 {
     Q_OBJECT
-#pragma pack(push, 1)
-    struct ReceiverHeader {
-        qint16 start;
-        qint16 stop;
-        qint16 mark;
-        qint8 step;
-        qint8 type;
-        qint8 oscFixed;
-        qint8 spcFixed;
-        qint8 amplify;
-        qint8 diffMode;
-        qint16 dt;
-        qint8 rate;
-        qint8 modeFrom;
-        qint8 detector;
-
-        enum {
-            AM, FM
-        };
-
-        enum {
-            US, MS
-        };
-    };
-#pragma pack(pop)
 
     static const int COLUMN_COUNT = 1;
     static const int AMPLIFIER_BYTE_SHIFT = 110;
@@ -125,13 +101,13 @@ private:
 
     void _specifyOnModeChange(char);
 
-    void _toStatus(QByteArray&);
-    void _toSwitch(QByteArray&);
-    void _toAmplifier(QByteArray&);
-    void _toReciever(QByteArray&);
-    void _toNLD(QByteArray&);
-    void _toFDR(QByteArray&);
-    void _toBattery(const QByteArray &);
+    void _process(Starting&);
+    void _process(Battery&);
+    void _process(Amplifier&);
+    void _process(Switch&);
+    void _process(Reciver&);
+    void _process(NLD&);
+    void _process(FDR&);
 
     QPair<qint8, qint8> m_waitingSwitch;
     int m_waitingReset = SWITCH_PACKETS_TO_RESET;

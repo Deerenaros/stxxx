@@ -209,20 +209,24 @@ void DevicesModel::_specifyOnModeChange(char mode) {
     }
 }
 
-void DevicesModel::_toStatus(QByteArray& bytes) {
-    _toBattery(bytes.mid(5, 3));
+void DevicesModel::_process(Starting& data) {
+    _process(data.battery);
 
-    emit pinsChanged(bytes[2], bytes[3]);
+    emit pinsChanged(data.line1, data.line2);
 
-    switch(bytes[1]) {
+    switch(data.currentMode) {
     case 1:
-        emit dateSignal(bytes[8], bytes[9], bytes[10], bytes[11], bytes[12]);
+        emit dateSignal(data.settings.hours,
+                        data.settings.minutes,
+                        data.settings.year,
+                        data.settings.month,
+                        data.settings.day);
         break;
     }
 }
 
-void DevicesModel::_toBattery(const QByteArray &bytes) {
-    emit statusSignal(BATTERY_SCALE*bytes[1], bytes[2] == 1);
+void DevicesModel::_process(Battery& data) {
+    emit statusSignal(BATTERY_SCALE*data.charge, data.isCharging == 1);
 }
 
 bool DevicesModel::_haveToContinueSwitch(QPair<qint8, qint8> inout) {
@@ -231,13 +235,11 @@ bool DevicesModel::_haveToContinueSwitch(QPair<qint8, qint8> inout) {
     return result;
 }
 
-void DevicesModel::_toSwitch(QByteArray& bytes) {
-    auto data = bytes.mid(1, 6).data();
-
-    qint8 input = *reinterpret_cast<qint8*>(data+4);
-    qint8 output = *reinterpret_cast<qint8*>(data+5);
-    double dc = *reinterpret_cast<qint16*>(data+0) / SWITCH_ACDC_SCALE;
-    double ac = *reinterpret_cast<qint16*>(data+2) / SWITCH_ACDC_SCALE;
+void DevicesModel::_process(Switch& data) {
+    qint8 input = data.line1;
+    qint8 output = data.line2;
+    double dc = data.ac / SWITCH_ACDC_SCALE;
+    double ac = data.dc / SWITCH_ACDC_SCALE;
 
     debug << DMark("switch") << QString("dc: %1 ac: %2 in: %3 out: %4").arg(dc).arg(ac).arg(input).arg(output);
 
@@ -251,10 +253,10 @@ void DevicesModel::_toSwitch(QByteArray& bytes) {
     }
 }
 
-void DevicesModel::_toAmplifier(QByteArray& bytes) {
+void DevicesModel::_process(Amplifier& data) {
     int i = 0, k = m_amplifier.size();
-    auto data = bytes.mid(2, bytes.length() - 6);
-    for(auto byte = data.rbegin(); byte != data.rend(); byte++) {
+
+    for(auto byte = std::begin(data.oscilograme.data); byte != std::end(data.oscilograme.data); byte++) {
         m_amplifier.insert(k, QPointF(i--, (*byte) - AMPLIFIER_BYTE_SHIFT));
     }
 
@@ -263,8 +265,8 @@ void DevicesModel::_toAmplifier(QByteArray& bytes) {
         m_amplifier.remove(0, size - AMPLIFIER_LENGTH);
     }
 
-    for(i = 0; i < m_amplifier.size() - data.size(); i++) {
-        m_amplifier[i].rx() -= data.size();
+    for(i = 0; i < m_amplifier.size() - sizeof(data.oscilograme.data); i++) {
+        m_amplifier[i].rx() -= sizeof(data.oscilograme.data);
     }
 
     if(m_series != nullptr) {
@@ -274,29 +276,27 @@ void DevicesModel::_toAmplifier(QByteArray& bytes) {
     emit amplifierSignal(size);
 }
 
-void DevicesModel::_toReciever(QByteArray& bytes) {
-    Q_UNUSED(bytes);
+void DevicesModel::_process(Reciver& data) {
+    Q_UNUSED(data);
 }
 
-void DevicesModel::_toNLD(QByteArray& bytes) {
-    Q_UNUSED(bytes);
+void DevicesModel::_process(NLD& data) {
+    Q_UNUSED(data);
 }
 
-void DevicesModel::_toFDR(QByteArray& bytes) {
-    if(bytes[1] != '\0') {
-        if(m_auto && bytes[3] != char(7) && bytes[4] != char(8)) {
-            currentDevice().write(_nextSwitch(bytes[3], bytes[4]));
+void DevicesModel::_process(FDR& data) {
+    if(data.submode != FDR::START) {
+        if(m_auto && data.line1 != char(7) && data.line2 != char(8)) {
+            currentDevice().write(_nextSwitch(data.line1, data.line2));
             emit pinsChanged(m_waitingSwitch.first, m_waitingSwitch.second);
         }
 
-        if(bytes[2] > '\0') {
+        if(data.size > 0) {
             QList<QPair<double, int>> list;
-            int a = bytes[3], b = bytes[4];
+            int a = data.line1, b = data.line2;
 
-            for(qint8 i = 0; i < bytes[2]; i++) {
-                list << QPair<double, int>(
-                            *reinterpret_cast<quint16*>(bytes.data() + 5 + i*3) / 10.,
-                            *reinterpret_cast<quint8*>(bytes.data() + 7 + i*3));
+            for(qint8 i = 0; i < data.size; i++) {
+                list << QPair<double, int>(data.measments[i].len / 10., data.measments[i].lvl);
             }
 
             for(auto &item: list) {
@@ -309,38 +309,39 @@ void DevicesModel::_toFDR(QByteArray& bytes) {
 
             emit fdrSignal(2, a, b, list.first().first, list.first().second);
         } else {
-            emit fdrSignal(-1, bytes[3], bytes[4], 0, 0);
+            emit fdrSignal(-1, data.line1, data.line2, 0, 0);
         }
     } else {
-        emit fdrSignal(0, bytes[3], bytes[4], 0, 0);
+        emit fdrSignal(0, data.line1, data.line2, 0, 0);
     }
 }
 
 void DevicesModel::_packetRX(Device* sender, QByteArray* packet) {
     int devIndex = m_devices.indexOf(sender);
     Q_UNUSED(devIndex);
+    auto& _packet = *reinterpret_cast<Packet*>(packet->data());
 
-    switch (packet->at(0)) {
+    switch (_packet.mode) {
     case 'O':
-        _toAmplifier(*packet);
+        _process(_packet.data.amplifier);
         break;
     case 'V':
-        _toSwitch(*packet);
+        _process(_packet.data.swtch);
         break;
     case 'S':
-        _toStatus(*packet);
+        _process(_packet.data.starting);
         break;
     case 'B':
-        _toBattery(*packet);
+        _process(_packet.data.battery);
         break;
     case 'T':
-        _toFDR(*packet);
+        _process(_packet.data.fdr);
         break;
     case 'N':
-        _toNLD(*packet);
+        _process(_packet.data.nld);
         break;
     case 'C':
-        _toReciever(*packet);
+        _process(_packet.data.rx);
         break;
     default:
         break;
