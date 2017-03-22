@@ -1,3 +1,19 @@
+//    source/devicesmodel.cpp is part of STx
+//
+//    STx is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    STx is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
+
 #include "betterdebug.h"
 #include "devicesmodel.h"
 
@@ -10,7 +26,7 @@ QT_CHARTS_USE_NAMESPACE
 Q_DECLARE_METATYPE(QAbstractSeries *)
 Q_DECLARE_METATYPE(QAbstractAxis *)
 
-DevicesModel::DevicesModel(QQuickView *appViewer, QObject *parent)
+DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
     : QAbstractItemModel(parent)
     , m_waitingSwitch(QPair<quint8, quint8>(0, 0))
     , m_appViewer(appViewer)
@@ -25,7 +41,8 @@ DevicesModel::DevicesModel(QQuickView *appViewer, QObject *parent)
             QString name = SUPPORTED_PIDS[info.productIdentifier()];
             auto dev = new Device(name, info, this);
             m_devices.append(dev);
-            connect(dev, &Device::packetRead, this, &DevicesModel::_packetRX);
+            connect(dev, &Device::packetRead, this, &DeviceModel::_packetRX);
+            connect(dev, &Device::deviceError, this, &DeviceModel::deviceError);
         }
     }
 
@@ -34,33 +51,33 @@ DevicesModel::DevicesModel(QQuickView *appViewer, QObject *parent)
     }
 }
 
-DevicesModel::~DevicesModel() {
+DeviceModel::~DeviceModel() {
     for(Device *dev: m_devices) {
         dev->close();
     }
 }
 
-int DevicesModel::rowCount(const QModelIndex & parent) const {
+int DeviceModel::rowCount(const QModelIndex & parent) const {
     Q_UNUSED(parent);
     return m_devices.count();
 }
 
-int DevicesModel::columnCount(const QModelIndex & parent) const {
+int DeviceModel::columnCount(const QModelIndex & parent) const {
     Q_UNUSED(parent);
     return COLUMN_COUNT;
 }
 
-QModelIndex DevicesModel::index(int row, int column, const QModelIndex &parent) const {
+QModelIndex DeviceModel::index(int row, int column, const QModelIndex &parent) const {
     Q_UNUSED(parent);
     return createIndex(row, column);
 }
 
-QModelIndex DevicesModel::parent(const QModelIndex &child) const {
+QModelIndex DeviceModel::parent(const QModelIndex &child) const {
     Q_UNUSED(child);
     return QModelIndex();
 }
 
-QVariant DevicesModel::data(const QModelIndex & index, int role) const {
+QVariant DeviceModel::data(const QModelIndex & index, int role) const {
     if (index.row() < 0 || index.row() >= m_devices.count()) {
         return QVariant();
     }
@@ -75,47 +92,49 @@ QVariant DevicesModel::data(const QModelIndex & index, int role) const {
     return QVariant();
 }
 
-int DevicesModel::getCurrent() const {
+int DeviceModel::getCurrent() const {
     return m_currentDevice;
 }
 
-int DevicesModel::getCount() const {
+int DeviceModel::getCount() const {
     return m_devices.count();
 }
 
-bool DevicesModel::getAuto() const {
+bool DeviceModel::getAuto() const {
     return m_auto;
 }
 
-bool DevicesModel::getReady() const {
+bool DeviceModel::isReady() const {
     return m_currentDevice >= 0
         && m_currentDevice < m_devices.size()
         && m_devices[m_currentDevice] != nullptr
         && m_devices[m_currentDevice]->isReady();
 }
 
-void DevicesModel::closeAll() {
+void DeviceModel::closeAll() {
     for(Device *dev: m_devices) {
         dev->close();
     }
 }
 
-Device& DevicesModel::currentDevice() {
+Device& DeviceModel::currentDevice() {
     return *m_devices[m_currentDevice];
 }
 
-void DevicesModel::setCurrent(int current) {
+void DeviceModel::setCurrent(int current) {
     if(m_currentDevice != current) {
         m_currentDevice = current;
         emit currentChanged();
     }
 }
 
-void DevicesModel::retake() {
+void DeviceModel::retake() {
     currentDevice().write(QByteArray("R\x07"));
 }
 
-void DevicesModel::setModeForCurrent(char mode) {
+void DeviceModel::setMode(char mode) {
+    debug << DMark("mode") << int(mode);
+
     if(mode) {
         if(!currentDevice().isReady()) {
             currentDevice().open();
@@ -134,19 +153,19 @@ void DevicesModel::setModeForCurrent(char mode) {
     }
 }
 
-void DevicesModel::specifyModeForCurrent() {
+void DeviceModel::specifyMode() {
 }
 
-void DevicesModel::setSeries(QAbstractSeries* series) {
+void DeviceModel::setSeries(QAbstractSeries* series) {
     m_series = static_cast<QXYSeries*>(series);
 }
 
-void DevicesModel::setPins(int a, int b) {
+void DeviceModel::setPins(int a, int b) {
     char buff[] = {'I', char(1), char(a), char(b)};
     currentDevice().write(QByteArray(buff, 4));
 }
 
-void DevicesModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8 day) {
+void DeviceModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8 day) {
     char time[] = {'T', 1, hours, min};
     char date[] = {'T', 2, day, month, year};
 
@@ -154,7 +173,7 @@ void DevicesModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint
     currentDevice().write(QByteArray(date, 5));
 }
 
-void DevicesModel::setAuto(bool automate) {
+void DeviceModel::setAuto(bool automate) {
     if(automate != m_auto) {
         m_auto = automate;
         currentDevice().write(_nextSwitch(0, 0));
@@ -162,21 +181,31 @@ void DevicesModel::setAuto(bool automate) {
     }
 }
 
-void DevicesModel::setVelocityFactor(double factor) {
-    if(m_currentDevice >= 0 && m_currentDevice < m_devices.size() && currentDevice().isReady()) {
+void DeviceModel::setVelocityFactor(double factor) {
+    if(isReady()) {
         char buff[] = {'F', 1, char(factor), char(100*(factor-quint8(factor)))};
         currentDevice().write(QByteArray(buff, 4));
     }
 }
 
-QHash<int, QByteArray> DevicesModel::roleNames() const {
+void DeviceModel::flashCurrent(QString fileName) {
+    if(isReady()) {
+        currentDevice().flash(fileName);
+    }
+}
+
+void DeviceModel::deviceError(QString error, Device::Error type) {
+    emit firmwareError(error);
+}
+
+QHash<int, QByteArray> DeviceModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name";
     roles[DIdRole] = "did";
     return roles;
 }
 
-QByteArray DevicesModel::_nextSwitch(qint8 a, qint8 b) {
+QByteArray DeviceModel::_nextSwitch(qint8 a, qint8 b) {
     if(b == 0 || a == 0) {
         a = 1;
         b = 2;
@@ -197,7 +226,7 @@ QByteArray DevicesModel::_nextSwitch(qint8 a, qint8 b) {
     return QByteArray(buff, 4);
 }
 
-void DevicesModel::_specifyOnModeChange(char mode) {
+void DeviceModel::_specifyOnModeChange(char mode) {
     switch(mode) {
     case 2:
         m_auto = true;
@@ -209,7 +238,7 @@ void DevicesModel::_specifyOnModeChange(char mode) {
     }
 }
 
-void DevicesModel::_process(Starting& data) {
+void DeviceModel::_process(Starting& data) {
     _process(data.battery);
 
     emit pinsChanged(data.line1, data.line2);
@@ -225,17 +254,17 @@ void DevicesModel::_process(Starting& data) {
     }
 }
 
-void DevicesModel::_process(Battery& data) {
+void DeviceModel::_process(Battery& data) {
     emit statusSignal(BATTERY_SCALE*data.charge, data.isCharging == 1);
 }
 
-bool DevicesModel::_haveToContinueSwitch(QPair<qint8, qint8> inout) {
+bool DeviceModel::_haveToContinueSwitch(QPair<qint8, qint8> inout) {
     bool result = !(m_waitingSwitch.first || m_waitingSwitch.second);
     result |= m_waitingReset || inout == m_waitingSwitch;
     return result;
 }
 
-void DevicesModel::_process(Switch& data) {
+void DeviceModel::_process(Switch& data) {
     qint8 input = data.line1;
     qint8 output = data.line2;
     double dc = data.ac / SWITCH_ACDC_SCALE;
@@ -253,10 +282,10 @@ void DevicesModel::_process(Switch& data) {
     }
 }
 
-void DevicesModel::_process(Amplifier& data) {
+void DeviceModel::_process(Amplifier& data) {
     int i = 0, k = m_amplifier.size();
 
-    for(auto byte = std::begin(data.oscilograme.data); byte != std::end(data.oscilograme.data); byte++) {
+    for(auto byte = std::begin(data.oscillogramme.data); byte != std::end(data.oscillogramme.data); byte++) {
         m_amplifier.insert(k, QPointF(i--, (*byte) - AMPLIFIER_BYTE_SHIFT));
     }
 
@@ -265,8 +294,8 @@ void DevicesModel::_process(Amplifier& data) {
         m_amplifier.remove(0, size - AMPLIFIER_LENGTH);
     }
 
-    for(i = 0; i < m_amplifier.size() - sizeof(data.oscilograme.data); i++) {
-        m_amplifier[i].rx() -= sizeof(data.oscilograme.data);
+    for(i = 0; i < int(m_amplifier.size() - sizeof(data.oscillogramme.data)); i++) {
+        m_amplifier[i].rx() -= sizeof(data.oscillogramme.data);
     }
 
     if(m_series != nullptr) {
@@ -276,15 +305,15 @@ void DevicesModel::_process(Amplifier& data) {
     emit amplifierSignal(size);
 }
 
-void DevicesModel::_process(Reciver& data) {
+void DeviceModel::_process(Receiver& data) {
     Q_UNUSED(data);
 }
 
-void DevicesModel::_process(NLD& data) {
+void DeviceModel::_process(NLD& data) {
     Q_UNUSED(data);
 }
 
-void DevicesModel::_process(FDR& data) {
+void DeviceModel::_process(FDR& data) {
     if(data.submode != FDR::START) {
         if(m_auto && data.line1 != char(7) && data.line2 != char(8)) {
             currentDevice().write(_nextSwitch(data.line1, data.line2));
@@ -316,31 +345,48 @@ void DevicesModel::_process(FDR& data) {
     }
 }
 
-void DevicesModel::_packetRX(Device* sender, QByteArray* packet) {
+void DeviceModel::_process(Flashing& flash) {
+    switch (flash.status) {
+    case 1:
+        debug << DMark("flash") << "not complete";
+        break;
+    case 7:
+        /* complete */
+        break;
+    default:
+        currentDevice().flash();
+        break;
+    }
+}
+
+void DeviceModel::_packetRX(Device* sender, QByteArray* packet) {
     int devIndex = m_devices.indexOf(sender);
     Q_UNUSED(devIndex);
     auto& _packet = *reinterpret_cast<Packet*>(packet->data());
 
-    switch (_packet.mode) {
-    case 'O':
+    switch (_packet.mod) {
+    case Modes::FLASHING:
+        _process(_packet.data.flash);
+        break;
+    case Modes::AMPL:
         _process(_packet.data.amplifier);
         break;
-    case 'V':
+    case Modes::SWITCH:
         _process(_packet.data.swtch);
         break;
-    case 'S':
+    case Modes::STARTING:
         _process(_packet.data.starting);
         break;
-    case 'B':
+    case Modes::BATTERY:
         _process(_packet.data.battery);
         break;
-    case 'T':
+    case Modes::FDR:
         _process(_packet.data.fdr);
         break;
-    case 'N':
+    case Modes::NLD:
         _process(_packet.data.nld);
         break;
-    case 'C':
+    case Modes::RX:
         _process(_packet.data.rx);
         break;
     default:

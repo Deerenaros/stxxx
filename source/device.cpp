@@ -1,3 +1,18 @@
+//    source/device.cpp is part of STx
+//
+//    STx is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    STx is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "betterdebug.h"
 #include "device.h"
 
@@ -85,7 +100,7 @@ void Device::write(const QByteArray &data) {
     }
 
     for (int i = 0; i < data.count(); i++) {
-        str2 += QString("0x%1 ").arg(unsigned(data.at(i)), 2, 16, QChar('0'));
+        str2 += QString("0x%1 ").arg((quint8)data.at(i), 2, 16, QChar('0'));
 
         if (i == 0) {
             str2 += QString("(%1)  ").arg(data.at(i));
@@ -115,7 +130,7 @@ void Device::write(const QByteArray &data) {
     m_port->write(str, ind);
     m_mutex.unlock();
 
-    debug << DMark("writen") << str2;
+    debug << DMark("writen") << "<< " << str2;
 }
 
 void Device::run() {
@@ -140,7 +155,7 @@ void Device::run() {
             if (ch == (char)0xc1) { // конец пакета
                 if (step == 5) {
                     step = 0;
-                    debug << DMark("read") << strBuf;
+                    debug << DMark("read") << ">> " << strBuf;
                     m_mutex.lock();
                     emit packetRead(this, new QByteArray(buff));
                     m_mutex.unlock();
@@ -196,7 +211,7 @@ void Device::run() {
                 } else {
                     step = 0;
                     strBuf = strBuf;
-                    critical << DMark("read") << strBuf;
+                    fatal << DMark("read") << ">> " << strBuf;
                 }
             }
         }
@@ -211,5 +226,70 @@ void Device::close() {
         m_port->close();
         this->terminate();
         m_mutex.unlock();
+    }
+}
+
+static quint32 size, send, step, progr=0, cnt;
+
+void Device::flash(QString fileName) {
+    QByteArray str;
+    quint32 tmp;
+    quint8 i;
+
+    m_firmware.setFileName(fileName.remove("file:///"));
+    if(!m_firmware.open(QIODevice::ReadOnly)) {
+        emit deviceError(m_firmware.errorString(), Device::FIRMWARE);
+    }
+
+    QDataStream in;
+    in.setDevice(&m_firmware);
+    in.setByteOrder(QDataStream::LittleEndian);
+
+    QDataStream out(&str, QIODevice::WriteOnly);
+    out.setByteOrder(QDataStream::LittleEndian);
+    out << (quint8)'D';
+    in >> i; out << i; in >> i; out << i; in >> i; out << i; // 300
+    in >> i; out << i; in >> i; out << i;    // Версия
+    in >> i; out << i; // кол-во файлов внутри
+    in >> tmp;  // Размер
+    size = tmp;
+    out << tmp;
+    in >> i; out << i; // признак наличия MCU
+    in >> tmp; out << tmp; // размер MCU
+    write(str);
+    debug << size << " would be written";
+    send = 0;
+    step = size/99;  // шаг для прогресса
+    progr = 0;
+    cnt = 0;
+}
+
+void Device::flash() {
+    QDataStream in;
+    in.setDevice(&m_firmware);
+    in.setByteOrder(QDataStream::LittleEndian);
+
+    QByteArray str;
+    QDataStream out(&str, QIODevice::WriteOnly);
+    out.setByteOrder(QDataStream::LittleEndian);
+    out << (quint8)'D';
+    quint8 tmp8;
+    for (int i=0; i<128; i++) { // по 128 байт (всегда, даже если лишние будут)
+        in >> tmp8;
+        out << tmp8;
+        send++;
+    }
+
+    write(str);
+    cnt += 128; // счетчик для прогресса
+    if (cnt >= step) // увеличиваем и отправляем прогресс
+    {
+        while (cnt >= step)
+        {
+            cnt -= step;
+            if (progr<100) progr++;
+        }
+
+        write(QByteArray({'P', (qint8)progr}));
     }
 }

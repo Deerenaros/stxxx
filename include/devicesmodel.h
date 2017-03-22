@@ -1,6 +1,23 @@
+//    include/device.h is part of STx
+//
+//    STx is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    STx is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
+
 #ifndef DEVICESMODEL_H
 #define DEVICESMODEL_H
 
+#include <QObject>
 #include <QVariant>
 #include <QVariantList>
 #include <QAbstractItemModel>
@@ -14,14 +31,13 @@
 #include "device.h"
 #include "packets.h"
 
-
 QT_BEGIN_NAMESPACE
 class QQuickView;
 QT_END_NAMESPACE
 
 QT_CHARTS_USE_NAMESPACE
 
-class DevicesModel
+class DeviceModel
         : public QAbstractItemModel
 {
     Q_OBJECT
@@ -39,12 +55,12 @@ class DevicesModel
 
     Q_PROPERTY(int current READ getCurrent WRITE setCurrent NOTIFY currentChanged)
     Q_PROPERTY(bool automate READ getAuto WRITE setAuto NOTIFY autoChanged)
-    Q_PROPERTY(bool isReady READ getReady)
+    Q_PROPERTY(bool isReady READ isReady)
     Q_PROPERTY(int count READ getCount NOTIFY countChanged)
 
 public:
-    explicit DevicesModel(QQuickView *appViewer, QObject *parent = 0);
-    ~DevicesModel();
+    explicit DeviceModel(QQuickView *appViewer, QObject *parent = 0);
+    ~DeviceModel();
 
     enum DevicesRoles {
         NameRole = Qt::UserRole + 1,
@@ -59,7 +75,7 @@ public:
 
     Device& currentDevice();
     int getCurrent() const;
-    bool getReady() const;
+    bool isReady() const;
     bool getAuto() const;
     int getCount() const;
 
@@ -71,6 +87,7 @@ signals:
     void dateSignal(int hours, int min, int year, int month, int day);
     void fdrSignal(int what, int a, int b, double len, unsigned lvl);
     void pinsChanged(int a, int b);
+    void firmwareError(QString error);
 
     int currentChanged();
     void countChanged();
@@ -81,11 +98,13 @@ public slots:
     void setCurrent(int);
     void retake();
     void setAuto(bool);
-    void setModeForCurrent(char);
-    void specifyModeForCurrent();
+    void setMode(char);
+    void specifyMode();
     void setSeries(QAbstractSeries*);
     void setPins(int, int);
     void setVelocityFactor(double factor);
+    void flashCurrent(QString);
+    void deviceError(QString, Device::Error);
 
     void setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8 day);
 
@@ -105,9 +124,10 @@ private:
     void _process(Battery&);
     void _process(Amplifier&);
     void _process(Switch&);
-    void _process(Reciver&);
+    void _process(Receiver&);
     void _process(NLD&);
     void _process(FDR&);
+    void _process(Flashing&);
 
     QPair<qint8, qint8> m_waitingSwitch;
     int m_waitingReset = SWITCH_PACKETS_TO_RESET;
