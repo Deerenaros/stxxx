@@ -79,14 +79,4 @@ Item {
             firstSet.resultModel.clear()
         }
     }
-
-    function toggleAuto() {
-        var component = Qt.createComponent("FDRAutomate.qml");
-        if(component !== null && component.status === Component.Ready) {
-            win = component.createObject(fdr);
-            win.show();
-        } else if(component !== null && component.status === Component.Error) {
-            console.debug(component.errorString())
-        }
-    }
 }

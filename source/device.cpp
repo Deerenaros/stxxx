@@ -130,7 +130,7 @@ void Device::write(const QByteArray &data) {
     m_port->write(str, ind);
     m_mutex.unlock();
 
-    debug << DMark("writen") << "<< " << str2;
+    qdebug("writen") << ">>" << str2;
 }
 
 void Device::run() {
@@ -155,7 +155,7 @@ void Device::run() {
             if (ch == (char)0xc1) { // конец пакета
                 if (step == 5) {
                     step = 0;
-                    debug << DMark("read") << ">> " << strBuf;
+                    qdebug("read") << ">> " << strBuf;
                     m_mutex.lock();
                     emit packetRead(this, new QByteArray(buff));
                     m_mutex.unlock();
@@ -211,7 +211,7 @@ void Device::run() {
                 } else {
                     step = 0;
                     strBuf = strBuf;
-                    fatal << DMark("read") << ">> " << strBuf;
+                    qfatal("read") << ">> " << strBuf;
                 }
             }
         }
@@ -231,6 +231,9 @@ void Device::close() {
 
 static quint32 size, send, step, progr=0, cnt;
 
+
+/// \todo Добавить таймаут на подверждение прошивки
+/// \todo Уменьшить размер пакета до 100
 void Device::flash(QString fileName) {
     QByteArray str;
     quint32 tmp;
@@ -257,7 +260,7 @@ void Device::flash(QString fileName) {
     in >> i; out << i; // признак наличия MCU
     in >> tmp; out << tmp; // размер MCU
     write(str);
-    debug << size << " would be written";
+    qdebug("flash") << size << " would be written";
     send = 0;
     step = size/99;  // шаг для прогресса
     progr = 0;

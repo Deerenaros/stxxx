@@ -26,10 +26,6 @@
 #include <QThread>
 
 #include <QAbstractSeries>
-#include <QXYSeries>
-
-#include "device.h"
-#include "packets.h"
 
 QT_BEGIN_NAMESPACE
 class QQuickView;
@@ -37,18 +33,16 @@ QT_END_NAMESPACE
 
 QT_CHARTS_USE_NAMESPACE
 
+#include "processor.h"
+
 class DeviceModel
         : public QAbstractItemModel
 {
     Q_OBJECT
 
     static const int COLUMN_COUNT = 1;
-    static const int AMPLIFIER_BYTE_SHIFT = 110;
     static const int SWITCH_MODE = 3;
     static const int SWITCH_PACKETS_TO_RESET = -5;
-    static const int AMPLIFIER_LENGTH = 256;
-    const double SWITCH_ACDC_SCALE = 10.;
-    const double BATTERY_SCALE = 100./5;
     const QMap<uint16_t, QString> SUPPORTED_PIDS = {
         { 0x6015, "ST300" }
     };
@@ -79,6 +73,8 @@ public:
     bool getAuto() const;
     int getCount() const;
 
+    void bind(Processor*);
+
 Q_SIGNALS:
 signals:
     void amplifierSignal(int count);
@@ -97,6 +93,7 @@ public slots:
     void closeAll();
     void setCurrent(int);
     void retake();
+    void report();
     void setAuto(bool);
     void setMode(char);
     void specifyMode();
@@ -115,28 +112,16 @@ private slots:
     void _packetRX(Device*, QByteArray*);
 
 private:
-    bool _haveToContinueSwitch(QPair<qint8, qint8>);
-    QByteArray _nextSwitch(qint8, qint8);
-
     void _specifyOnModeChange(char);
 
-    void _process(Starting&);
-    void _process(Battery&);
-    void _process(Amplifier&);
-    void _process(Switch&);
-    void _process(Receiver&);
-    void _process(NLD&);
-    void _process(FDR&);
-    void _process(Flashing&);
 
     QPair<qint8, qint8> m_waitingSwitch;
     int m_waitingReset = SWITCH_PACKETS_TO_RESET;
     int m_currentDevice = -1;
     char m_currentMode = 0x00;
-    QVector<QPointF> m_amplifier;
     QQuickView *m_appViewer = nullptr;
-    QXYSeries *m_series = nullptr;
     QList<Device*> m_devices;
+    QList<Processor*> m_processors;
 
     bool m_auto = false;
 };

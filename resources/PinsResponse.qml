@@ -85,10 +85,6 @@ Item {
         devicesModel.automate = true
     }
 
-    onClosing: {
-        devicesModel.automate = false
-    }
-
     function get(i, j) {
         if(pins[i-1] && pins[i-1][j-i-1]) {
             return pins[i-1][j-i-1];

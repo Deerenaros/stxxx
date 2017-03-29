@@ -2,6 +2,10 @@ import qbs 1.0
 
 CppApplication {
     files: [
+        "include/devicelogic.h",
+        "include/processor.h",
+        "include/report.h",
+        "libs/**/*",
         "include/application.h",
         "include/betterdebug.h",
         "include/device.h",
@@ -20,7 +24,7 @@ CppApplication {
         "resources/FDRResults.qml",
         "resources/FDRSignal.qml",
         "resources/MultiText.qml",
-        "resources/NLD.qml",
+        "resources/NLD/NLD.qml",
         "resources/OffMode.qml",
         "resources/Oscilloscope.qml",
         "resources/PINSelector.qml",
@@ -36,12 +40,14 @@ CppApplication {
         "resources/main.qml",
         "source/application.cpp",
         "source/device.cpp",
+        "source/devicelogic.cpp",
         "source/devicesmodel.cpp",
+        "source/report.cpp",
     ]
 
     Depends {
         name: "Qt"
-        submodules: ["charts", "qml", "quick", "serialport", "network"]
+        submodules: ["charts", "qml", "quick", "serialport", "network", "gui", "gui-private"]
     }
 
     Depends {
@@ -53,6 +59,7 @@ CppApplication {
         qbs.install: true
     }
 
-    cpp.includePaths: ["./include"]
+    cpp.defines: ["XLSX_NO_LIB"]
+    cpp.includePaths: ["./include", "./libs/include"]
     // cpp.staticLibraries: ["Qt5PlatformSupport", "opengl32", "qwindows", "imm32", "winmm", "Ws2_32"]
 }

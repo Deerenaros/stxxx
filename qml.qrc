@@ -9,7 +9,6 @@
         <file>resources/Oscilloscope.qml</file>
         <file>resources/Settings.qml</file>
         <file>resources/FDR.qml</file>
-        <file>resources/NLD.qml</file>
         <file>resources/Receiver.qml</file>
         <file>resources/SwitchItem.qml</file>
         <file>resources/StatusBar.qml</file>
@@ -25,5 +24,8 @@
         <file>resources/PINSelector.qml</file>
         <file>resources/PINsResponse.qml</file>
         <file>resources/functions/helpers.js</file>
+        <file>resources/NLD/NLD.qml</file>
+        <file>resources/NLD/qmldir</file>
+        <file>resources/Report/Report.qml</file>
     </qresource>
 </RCC>

@@ -1,4 +1,4 @@
-//    resources/NLD.qml is part of STx
+//    resources/Report/Report.qml is part of STx
 //
 //    STx is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by

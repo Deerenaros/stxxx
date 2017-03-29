@@ -38,8 +38,10 @@ public:
 signals:
 public slots:
 private:
-    QQuickView viewer;
-    DeviceModel model;
+    QQuickView m_viewer;
+    DeviceModel m_model;
+
+
 };
 
 #endif // APPLICATION_H

@@ -21,19 +21,25 @@
 #include <QQmlEngine>
 #include <QDir>
 
+#include "report.h"
+#include "devicelogic.h"
+
 Application::Application(int &argc, char **argv)
     : QApplication(argc, argv)
-    , viewer()
-    , model(&viewer)
+    , m_viewer()
+    , m_model(&m_viewer)
 {
-    QString extraImportPath = QString(IMPORT_PATH).arg(QGuiApplication::applicationDirPath(), QString::fromLatin1("qml"));
-    viewer.engine()->addImportPath(extraImportPath);
-    viewer.rootContext()->setContextProperty("devicesModel", &model);
-    viewer.setTitle(APPLICATION_TITLE);
-    viewer.setSource(QUrl(RESOURCE_MAIN));
-    viewer.setResizeMode(QQuickView::SizeRootObjectToView);
-    viewer.show();
+    m_model.bind(new DeviceLogic());
+    m_model.bind(new Report("report.xlsx"));
 
-    connect(viewer.engine(), &QQmlEngine::quit, &viewer, &QWindow::close);
-    connect(this, &QApplication::aboutToQuit, &model, &DeviceModel::closeAll);
+    QString extraImportPath = QString(IMPORT_PATH).arg(QGuiApplication::applicationDirPath(), QString::fromLatin1("qml"));
+    m_viewer.engine()->addImportPath(extraImportPath);
+    m_viewer.rootContext()->setContextProperty("devicesModel", &m_model);
+    m_viewer.setTitle(APPLICATION_TITLE);
+    m_viewer.setSource(QUrl(RESOURCE_MAIN));
+    m_viewer.setResizeMode(QQuickView::SizeRootObjectToView);
+    m_viewer.show();
+
+    connect(m_viewer.engine(), &QQmlEngine::quit, &m_viewer, &QWindow::close);
+    connect(this, &QApplication::aboutToQuit, &m_model, &DeviceModel::closeAll);
 }

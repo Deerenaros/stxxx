@@ -36,8 +36,7 @@ public:
     }
 };
 
-#define debug qDebug().nospace().noquote()
-#define fatal qCritical().nospace().noquote()
-
+#define qdebug(x) qDebug().nospace().noquote() << DMark(x)
+#define qfatal(x) qCritical().nospace().noquote() << DMark(x)
 
 #endif
