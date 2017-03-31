@@ -22,17 +22,20 @@
 #include <QSerialPortInfo>
 #include <QByteArray>
 #include <QSerialPort>
-#include <QMutex>
 #include <QThread>
 #include <QQueue>
 #include <QFile>
 
 #include <QMessageBox>
 
+#include "packets.h"
+#include "locked.h"
+
 class Device
         : public QThread
 {
     Q_OBJECT
+    LOCKABLE
 
     static const quint8 START = 0xC0;
     static const quint8 END   = 0xC1;
@@ -46,6 +49,11 @@ public:
     enum Error {
         FIRMWARE
     };
+
+    struct Pins {
+        quint8 first;
+        quint8 second;
+    } pins;
 
     friend class DevicesModel;
 
@@ -65,8 +73,11 @@ public:
     QByteArray read();
 
 signals:
-    void packetRead(Device* sender, QByteArray* data);
+    void packetRead(Device* sender, Packet* data);
     void deviceError(QString error, Error type = FIRMWARE);
+
+public slots:
+    void clearPacket();
 
 protected:
     void run();
@@ -75,15 +86,14 @@ private:
     QString strBuf;
     bool esc = false;
     quint8 step = 0, crc = 0;
-    quint16 rxCNT = 0, cnt = 0;
+    quint16 rxCNT = 0, count = 0;
 
 private:
-    QMutex m_mutex;
-
     QFile m_firmware;
 
     QString m_name;
     QQueue<QByteArray*> m_queuedBuff;
+    QByteArray* m_packet = nullptr;
     QByteArray* m_buff = nullptr;
     QSerialPort* m_port = nullptr;
     const QSerialPortInfo m_portInfo;

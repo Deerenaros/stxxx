@@ -3,6 +3,7 @@ import qbs 1.0
 CppApplication {
     files: [
         "include/devicelogic.h",
+        "include/locked.h",
         "include/processor.h",
         "include/report.h",
         "libs/**/*",

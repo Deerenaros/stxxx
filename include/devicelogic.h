@@ -4,8 +4,8 @@
 #include <QAbstractSeries>
 #include <QXYSeries>
 
-#include "processor.h"
 #include "betterdebug.h"
+#include "processor.h"
 
 QT_CHARTS_USE_NAMESPACE
 

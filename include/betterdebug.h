@@ -16,6 +16,7 @@
 #ifndef BETTERDEBUG_H
 #define BETTERDEBUG_H
 
+#include <QtGlobal>
 #include <QDebug>
 #include <QHostAddress>
 #include <QTcpSocket>

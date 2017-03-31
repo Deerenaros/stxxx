@@ -26,7 +26,6 @@ void DeviceLogic::process(Device &dev, Battery& data) {
     emit model->statusSignal(BATTERY_SCALE*data.charge, data.isCharging == 1);
 }
 
-
 void DeviceLogic::process(Device &dev, Switch& data) {
     Q_UNUSED(dev);
 

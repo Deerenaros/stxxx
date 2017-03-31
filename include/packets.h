@@ -20,20 +20,29 @@
 
 #pragma pack(push, 1)
 #define MAX_PACKET_SIZE 256
+#define permanent static constexpr
 
 typedef qint8 mode;
 
+struct Stuff {
+    permanent char START = (char)0xc0;
+    permanent char END = (char)0xc1;
+    permanent char ESC = (char)0xdb;
+    permanent char ESC_START = (char)0xdc;
+    permanent char ESC_END = (char)0xdd;
+    permanent char ESC_ESC = (char)0xde;
+};
+
 struct Modes {
-    enum _modes {
-        BATTERY = 'B',
-        FLASHING = 'D',
-        STARTING = 'S',
-        SWITCH = 'V',
-        AMPL = 'O',
-        RX = 'C',
-        FDR = 'T',
-        NLD = 'N',
-    };
+    permanent char BATTERY = 'B';
+    permanent char FLASHING = 'D';
+    permanent char PROGRESS = 'P';
+    permanent char STARTING = 'S';
+    permanent char SWITCH = 'V';
+    permanent char AMPL = 'O';
+    permanent char RX = 'C';
+    permanent char FDR = 'T';
+    permanent char NLD = 'N';
 };
 
 struct Constants {

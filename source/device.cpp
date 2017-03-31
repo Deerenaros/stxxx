@@ -52,7 +52,7 @@ bool Device::isReady() const {
 }
 
 void Device::open() {
-    m_mutex.lock();
+    LOCKED
 
     if(m_port == nullptr) {
         m_port = new QSerialPort(m_portInfo, this);
@@ -69,8 +69,6 @@ void Device::open() {
     ok &= m_port->setFlowControl(QSerialPort::NoFlowControl);
 
     this->start();
-
-    m_mutex.unlock();
 }
 
 quint8 Device::checkESC(quint8 byte) {
@@ -90,7 +88,7 @@ void Device::write(const QByteArray &data) {
     QString str2;
     QByteArray str("\xC0\x00", 2);
     quint8 crc = 0, ind = str.count(), tmp;
-    str2 = QString("%1:").arg(data.count());
+    str2 = QString("%1: ").arg(data.count(), 3);
     str[ind++] = static_cast<quint8>(data.count());
     tmp = checkESC(str[ind-1]);
 
@@ -126,62 +124,61 @@ void Device::write(const QByteArray &data) {
 
     str[ind++] = END;
 
-    m_mutex.lock();
-    m_port->write(str, ind);
-    m_mutex.unlock();
+    LOCKEDX( m_port->write(str, ind) );
 
-    qdebug("writen") << ">>" << str2;
+    qdebug("writen") << "<< " << str2;
 }
 
 void Device::run() {
     for(;;) {
-        m_mutex.lock();
-        auto data = (isReady() ? m_port->readAll() : QByteArray());
-        m_mutex.unlock();
-
+        LOCKEDX( auto data = (isReady() ? m_port->readAll() : QByteArray()) );
         QByteArray &buff = *m_buff;
         for(char ch: data) {
-
             if (step == 3) {
                 strBuf += QString("0x%1 ").arg((quint8)ch, 2, 16, QChar('0'));
             }
 
-            if (ch == (char)0xc0) {
-                step = 1; // приняли начало пакета - ждем размер
+            if (ch == Stuff::START) {
+                step = 1;
                 esc = false;
                 continue;
             }
 
-            if (ch == (char)0xc1) { // конец пакета
+            if (ch == Stuff::END) {
                 if (step == 5) {
                     step = 0;
                     qdebug("read") << ">> " << strBuf;
-                    m_mutex.lock();
-                    emit packetRead(this, new QByteArray(buff));
-                    m_mutex.unlock();
+
+                    clearPacket();
+                    m_packet = new QByteArray(buff);
+                    emit packetRead(this, reinterpret_cast<Packet*>(m_packet->data()));
+
                     buff.clear();
                     strBuf.clear();
                 }
+
+                this->msleep(SLEEP_DELAY);
                 continue;
             }
 
-            if (ch == (char)0xdb) {
+            if (ch == Stuff::ESC) {
                 esc = true;
                 continue;
             }
 
             if (esc) {
-                if (ch == (char)0xdc) {
-                    ch = (char)0xc0;
-                } else if (ch == (char)0xdd) {
-                    ch = (char)0xc1;
-                } else if (ch == (char)0xde) {
-                    ch = (char)0xdb;
+                switch(ch) {
+                case Stuff::ESC_START:
+                    ch = Stuff::START;
+                    break;
+                case Stuff::ESC_END:
+                    ch = Stuff::END;
+                    break;
+                case Stuff::ESC_ESC:
+                    ch = Stuff::ESC;
+                    break;
                 }
 
-                if (step == 3) {
-                    //strBuf += "(" + QByteArray::number((quint8)ch, 16).toUpper() + ") ";
-                }
                 esc = false;
             }
 
@@ -190,18 +187,18 @@ void Device::run() {
                 step = 2;
             } else if (step == 2) { // младший байт размера пакета
                 rxCNT += quint8(ch);
-                cnt = 0;
+                count = 0;
                 crc = 0;
                 step = 3;
-                strBuf += QString("%1: ").arg(rxCNT);
+                strBuf += QString("%1: ").arg(rxCNT, 3);
             } else if (step == 3) {
-                if (cnt == 0) {
+                if (count == 0) {
                     strBuf += QString("(%1)  ").arg(ch);
                 }
-                buff[cnt] = (quint8)ch;
+                buff[count] = (quint8)ch;
                 crc += (quint8)ch;
-                cnt++;
-                if (cnt == rxCNT) {
+                count++;
+                if (count == rxCNT) {
                     step = 4;
                 }
             } else if (step == 4) {
@@ -220,16 +217,25 @@ void Device::run() {
     }
 }
 
-void Device::close() {
-    if(this->isRunning()) {
-        m_mutex.lock();
-        m_port->close();
-        this->terminate();
-        m_mutex.unlock();
+void Device::clearPacket() {
+    LOCKED
+
+    if(m_packet != nullptr) {
+        delete m_packet;
+        m_packet = nullptr;
     }
 }
 
-static quint32 size, send, step, progr=0, cnt;
+void Device::close() {
+    LOCKED
+
+    if(this->isRunning()) {
+        m_port->close();
+        this->terminate();
+    }
+}
+
+static quint32 size, send, step, progress=0, cnt;
 
 
 /// \todo Добавить таймаут на подверждение прошивки
@@ -250,7 +256,9 @@ void Device::flash(QString fileName) {
 
     QDataStream out(&str, QIODevice::WriteOnly);
     out.setByteOrder(QDataStream::LittleEndian);
-    out << (quint8)'D';
+
+    out << static_cast<quint8>(Modes::FLASHING);
+
     in >> i; out << i; in >> i; out << i; in >> i; out << i; // 300
     in >> i; out << i; in >> i; out << i;    // Версия
     in >> i; out << i; // кол-во файлов внутри
@@ -263,8 +271,8 @@ void Device::flash(QString fileName) {
     qdebug("flash") << size << " would be written";
     send = 0;
     step = size/99;  // шаг для прогресса
-    progr = 0;
-    cnt = 0;
+    progress = 0;
+    count = 0;
 }
 
 void Device::flash() {
@@ -275,24 +283,27 @@ void Device::flash() {
     QByteArray str;
     QDataStream out(&str, QIODevice::WriteOnly);
     out.setByteOrder(QDataStream::LittleEndian);
-    out << (quint8)'D';
+
+    out << static_cast<quint8>(Modes::FLASHING);
+
     quint8 tmp8;
-    for (int i=0; i<128; i++) { // по 128 байт (всегда, даже если лишние будут)
+    for (int i=0; i < 128; i++) { // по 128 байт (всегда, даже если лишние будут)
         in >> tmp8;
         out << tmp8;
         send++;
     }
 
     write(str);
-    cnt += 128; // счетчик для прогресса
-    if (cnt >= step) // увеличиваем и отправляем прогресс
+
+    count += 128; // счетчик для прогресса
+    if (count >= step) // увеличиваем и отправляем прогресс
     {
-        while (cnt >= step)
+        while (count >= step)
         {
-            cnt -= step;
-            if (progr<100) progr++;
+            count -= step;
+            if (progress < 100) progress++;
         }
 
-        write(QByteArray({'P', (qint8)progr}));
+        write(QByteArray({Modes::PROGRESS, (qint8)progress}));
     }
 }

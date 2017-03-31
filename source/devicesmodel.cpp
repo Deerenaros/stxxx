@@ -14,12 +14,13 @@
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "betterdebug.h"
-#include "devicesmodel.h"
 
 #include <QAreaSeries>
 #include <QQuickView>
 #include <QList>
+
+#include "betterdebug.h"
+#include "devicesmodel.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -41,6 +42,7 @@ DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
             QString name = SUPPORTED_PIDS[info.productIdentifier()];
             auto dev = new Device(name, info, this);
             m_devices.append(dev);
+
             connect(dev, &Device::packetRead, this, &DeviceModel::_packetRX);
             connect(dev, &Device::deviceError, this, &DeviceModel::deviceError);
         }
@@ -223,41 +225,38 @@ void DeviceModel::_specifyOnModeChange(char mode) {
 
 void DeviceModel::bind(Processor *p) {
     m_processors.append(p);
+    p->setModel(this);
 }
 
-void DeviceModel::_packetRX(Device* dev, QByteArray* _packet) {
-    auto& packet = *reinterpret_cast<Packet*>(_packet->data());
-
+void DeviceModel::_packetRX(Device* dev, Packet* packet) {
     for(Processor *p: m_processors) {
-        switch (packet.mod) {
+        switch (packet->mod) {
         case Modes::FLASHING:
-            p->process(*dev, packet.data.flash);
+            p->process(*dev, packet->data.flash);
             break;
         case Modes::AMPL:
-            p->process(*dev, packet.data.amplifier);
+            p->process(*dev, packet->data.amplifier);
             break;
         case Modes::SWITCH:
-            p->process(*dev, packet.data.swtch);
+            p->process(*dev, packet->data.swtch);
             break;
         case Modes::STARTING:
-            p->process(*dev, packet.data.starting);
+            p->process(*dev, packet->data.starting);
             break;
         case Modes::BATTERY:
-            p->process(*dev, packet.data.battery);
+            p->process(*dev, packet->data.battery);
             break;
         case Modes::FDR:
-            p->process(*dev, packet.data.fdr);
+            p->process(*dev, packet->data.fdr);
             break;
         case Modes::NLD:
-            p->process(*dev, packet.data.nld);
+            p->process(*dev, packet->data.nld);
             break;
         case Modes::RX:
-            p->process(*dev, packet.data.rx);
+            p->process(*dev, packet->data.rx);
             break;
         default:
             break;
         }
     }
-
-    delete _packet;
 }

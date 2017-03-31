@@ -84,6 +84,7 @@ signals:
     void fdrSignal(int what, int a, int b, double len, unsigned lvl);
     void pinsChanged(int a, int b);
     void firmwareError(QString error);
+    void processed();
 
     int currentChanged();
     void countChanged();
@@ -109,7 +110,7 @@ protected:
     QHash<int, QByteArray> roleNames() const;
 
 private slots:
-    void _packetRX(Device*, QByteArray*);
+    void _packetRX(Device*, Packet *packet);
 
 private:
     void _specifyOnModeChange(char);
