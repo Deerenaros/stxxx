@@ -25,39 +25,50 @@
 typedef qint8 mode;
 
 struct Stuff {
-    permanent char START = (char)0xc0;
-    permanent char END = (char)0xc1;
-    permanent char ESC = (char)0xdb;
-    permanent char ESC_START = (char)0xdc;
-    permanent char ESC_END = (char)0xdd;
-    permanent char ESC_ESC = (char)0xde;
+    permanent char START = '\xC0';
+    permanent char END = '\xC1';
+    permanent char ESC = '\xDB';
+    permanent char ESC_START = '\xDC';
+    permanent char ESC_END = '\xDD';
+    permanent char ESC_ESC = '\xDE';
 };
 
 struct Modes {
-    permanent char BATTERY = 'B';
-    permanent char FLASHING = 'D';
-    permanent char PROGRESS = 'P';
-    permanent char STARTING = 'S';
-    permanent char SWITCH = 'V';
-    permanent char AMPL = 'O';
-    permanent char RX = 'C';
-    permanent char FDR = 'T';
-    permanent char NLD = 'N';
+    struct Rx {
+        permanent char BATTERY = 'B';
+        permanent char FLASHING = 'D';
+        permanent char STARTING = 'S';
+        permanent char SWITCH = 'V';
+        permanent char AMPL = 'O';
+        permanent char RX = 'C';
+        permanent char NLD = 'N';
+        permanent char FDR = 'T';
+    };
+
+    struct Tx {
+        permanent char MODE = 'R';
+        permanent char FLASHING = 'D';
+        permanent char SWITCH = 'I';
+        permanent char PROGRESS = 'P';
+        permanent char SETS = 'T';
+        permanent char NLD = 'N';
+        permanent char FDR = 'F';
+    };
 };
 
 struct Constants {
-    static constexpr quint8 usec = 0;
-    static constexpr quint8 msec = 1;
+    permanent quint8 usec = 0;
+    permanent quint8 msec = 1;
 
-    static constexpr quint8 uV = 0;
-    static constexpr quint8 mV = 1;
-    static constexpr quint8 dV = 2;
+    permanent quint8 uV = 0;
+    permanent quint8 mV = 1;
+    permanent quint8 dV = 2;
 
-    static constexpr quint8 AM = 0;
-    static constexpr quint8 FM = 1;
+    permanent quint8 AM = 0;
+    permanent quint8 FM = 1;
 
-    static constexpr quint8 lowFQ  = 0;
-    static constexpr quint8 wideFQ = 1;
+    permanent quint8 lowFQ  = 0;
+    permanent quint8 wideFQ = 1;
 };
 
 struct Flashing {

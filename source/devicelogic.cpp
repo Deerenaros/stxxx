@@ -85,7 +85,7 @@ void DeviceLogic::process(Device &dev, FDR& data) {
     Q_UNUSED(dev);
 
     if(data.submode != FDR::START) {
-        if(m_auto && data.line1 != char(7) && data.line2 != char(8)) {
+        if(automate && data.line1 != char(7) && data.line2 != char(8)) {
             // dev.write(_nextSwitch(data.line1, data.line2));
             // emit m_model->pinsChanged(m_waitingSwitch.first, m_waitingSwitch.second);
         }

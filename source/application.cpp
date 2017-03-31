@@ -42,4 +42,9 @@ Application::Application(int &argc, char **argv)
 
     connect(m_viewer.engine(), &QQmlEngine::quit, &m_viewer, &QWindow::close);
     connect(this, &QApplication::aboutToQuit, &m_model, &DeviceModel::closeAll);
+    connect(&m_viewer, SIGNAL(event()), this, SLOT(onEvent()));
+}
+
+void Application::onEvent() {
+    qdebug("application") << "event!";
 }

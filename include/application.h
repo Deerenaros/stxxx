@@ -35,6 +35,10 @@ class Application : public QApplication
 
 public:
     explicit Application(int&, char**);
+
+public slots:
+    void onEvent();
+
 signals:
 public slots:
 private:

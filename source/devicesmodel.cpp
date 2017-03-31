@@ -131,7 +131,8 @@ void DeviceModel::setCurrent(int current) {
 }
 
 void DeviceModel::retake() {
-    currentDevice().write(QByteArray("R\x07"));
+    char buff[] = {Modes::Tx::MODE, 7};
+    currentDevice().write(QByteArray(buff, 2));
 }
 
 void DeviceModel::report() {
@@ -150,7 +151,7 @@ void DeviceModel::setMode(char mode) {
             mode += 1;
         }
 
-        char buff[] = {'R', mode};
+        char buff[] = {Modes::Tx::MODE, mode};
         currentDevice().write(QByteArray(buff, 2));
         _specifyOnModeChange(mode);
     } else {
@@ -167,13 +168,13 @@ void DeviceModel::setSeries(QAbstractSeries* series) {
 }
 
 void DeviceModel::setPins(int a, int b) {
-    char buff[] = {'I', char(1), char(a), char(b)};
+    char buff[] = {Modes::Tx::SWITCH, char(1), char(a), char(b)};
     currentDevice().write(QByteArray(buff, 4));
 }
 
 void DeviceModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8 day) {
-    char time[] = {'T', 1, hours, min};
-    char date[] = {'T', 2, day, month, year};
+    char time[] = {Modes::Tx::SETS, 1, hours, min};
+    char date[] = {Modes::Tx::SETS, 2, day, month, year};
 
     currentDevice().write(QByteArray(time, 4));
     currentDevice().write(QByteArray(date, 5));
@@ -189,7 +190,7 @@ void DeviceModel::setAuto(bool automate) {
 
 void DeviceModel::setVelocityFactor(double factor) {
     if(isReady()) {
-        char buff[] = {'F', 1, char(factor), char(100*(factor-quint8(factor)))};
+        char buff[] = {Modes::Tx::FDR, 1, char(factor), char(100*(factor-quint8(factor)))};
         currentDevice().write(QByteArray(buff, 4));
     }
 }
@@ -218,6 +219,7 @@ void DeviceModel::_specifyOnModeChange(char mode) {
         setPins(1, 2);
         break;
     case 5:
+        // range choosing
         currentDevice().write(QByteArray("S\x0c\x01", 3));
         break;
     }
@@ -231,28 +233,28 @@ void DeviceModel::bind(Processor *p) {
 void DeviceModel::_packetRX(Device* dev, Packet* packet) {
     for(Processor *p: m_processors) {
         switch (packet->mod) {
-        case Modes::FLASHING:
+        case Modes::Rx::FLASHING:
             p->process(*dev, packet->data.flash);
             break;
-        case Modes::AMPL:
+        case Modes::Rx::AMPL:
             p->process(*dev, packet->data.amplifier);
             break;
-        case Modes::SWITCH:
+        case Modes::Rx::SWITCH:
             p->process(*dev, packet->data.swtch);
             break;
-        case Modes::STARTING:
+        case Modes::Rx::STARTING:
             p->process(*dev, packet->data.starting);
             break;
-        case Modes::BATTERY:
+        case Modes::Rx::BATTERY:
             p->process(*dev, packet->data.battery);
             break;
-        case Modes::FDR:
+        case Modes::Rx::FDR:
             p->process(*dev, packet->data.fdr);
             break;
-        case Modes::NLD:
+        case Modes::Rx::NLD:
             p->process(*dev, packet->data.nld);
             break;
-        case Modes::RX:
+        case Modes::Rx::RX:
             p->process(*dev, packet->data.rx);
             break;
         default:

@@ -24,6 +24,8 @@ Item {
     height: 640
     property bool sourceLoaded: false
 
+    signal event()
+
     onWidthChanged: {
         // TODO: let's improve redraw on resize
     }

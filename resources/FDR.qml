@@ -74,7 +74,8 @@ Item {
         }
 
         function onAutomateSet(a, b, content) {
-            devicesModel.automate = false
+            // devicesModel.automate = false
+            main.event();
 
             firstSet.resultModel.clear()
         }

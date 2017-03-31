@@ -238,6 +238,7 @@ void Device::close() {
 static quint32 size, send, step, progress=0, cnt;
 
 
+/// \todo Рефакторинг!
 /// \todo Добавить таймаут на подверждение прошивки
 /// \todo Уменьшить размер пакета до 100
 void Device::flash(QString fileName) {
@@ -257,7 +258,7 @@ void Device::flash(QString fileName) {
     QDataStream out(&str, QIODevice::WriteOnly);
     out.setByteOrder(QDataStream::LittleEndian);
 
-    out << static_cast<quint8>(Modes::FLASHING);
+    out << static_cast<quint8>(Modes::Tx::FLASHING);
 
     in >> i; out << i; in >> i; out << i; in >> i; out << i; // 300
     in >> i; out << i; in >> i; out << i;    // Версия
@@ -284,7 +285,7 @@ void Device::flash() {
     QDataStream out(&str, QIODevice::WriteOnly);
     out.setByteOrder(QDataStream::LittleEndian);
 
-    out << static_cast<quint8>(Modes::FLASHING);
+    out << static_cast<quint8>(Modes::Tx::FLASHING);
 
     quint8 tmp8;
     for (int i=0; i < 128; i++) { // по 128 байт (всегда, даже если лишние будут)
@@ -304,6 +305,6 @@ void Device::flash() {
             if (progress < 100) progress++;
         }
 
-        write(QByteArray({Modes::PROGRESS, (qint8)progress}));
+        write(QByteArray({Modes::Tx::PROGRESS, (qint8)progress}));
     }
 }
