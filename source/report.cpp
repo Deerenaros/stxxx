@@ -28,3 +28,10 @@ void Report::process(Device &dev, FDR &fdr) {
 
 void Report::process(Device &dev, Flashing &flash) {
 }
+
+cvoid Report::value(const size_t name, cvoid p) {
+    switch(name) {
+    default:
+        return NOTHING;
+    }
+}

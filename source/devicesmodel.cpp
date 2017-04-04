@@ -103,7 +103,9 @@ int DeviceModel::getCount() const {
 }
 
 bool DeviceModel::getAuto() const {
-    return m_auto;
+    bool a = _getValue<bool>("automate");
+    qdebug("cast") << (a ? "!true" : "!false");
+    return a;
 }
 
 bool DeviceModel::isReady() const {
@@ -164,6 +166,7 @@ void DeviceModel::specifyMode() {
 }
 
 void DeviceModel::setSeries(QAbstractSeries* series) {
+    _setValues("series", series);
     // m_series = static_cast<QXYSeries*>(series);
 }
 
@@ -181,11 +184,7 @@ void DeviceModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8
 }
 
 void DeviceModel::setAuto(bool automate) {
-    if(automate != m_auto) {
-        m_auto = automate;
-        // currentDevice().write(_nextSwitch(0, 0));
-        emit autoChanged();
-    }
+    _setValues("automate", automate);
 }
 
 void DeviceModel::setVelocityFactor(double factor) {
@@ -215,8 +214,7 @@ QHash<int, QByteArray> DeviceModel::roleNames() const {
 void DeviceModel::_specifyOnModeChange(char mode) {
     switch(mode) {
     case 2:
-        m_auto = true;
-        setPins(1, 2);
+        // were is no more 'switch'
         break;
     case 5:
         // range choosing

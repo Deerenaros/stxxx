@@ -31,6 +31,8 @@
 #include "packets.h"
 #include "locked.h"
 
+
+/// \todo Rework to make write and read parallel
 class Device
         : public QThread
 {

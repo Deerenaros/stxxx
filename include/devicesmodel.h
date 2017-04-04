@@ -113,6 +113,27 @@ private slots:
     void _packetRX(Device*, Packet *packet);
 
 private:
+    template <typename T>
+    void _setValues(const char *name, T ptr) {
+        for(Processor *p: m_processors) {
+            p->value(name, ptr);
+        }
+    }
+
+    // bool still do not works
+    template <typename T>
+    T _getValue(const char *name) const {
+        cvoid ret = Processor::NOTHING;
+        for(Processor *p: m_processors) {
+            ret = p->value(name, Processor::TAKE);
+            if(ret != Processor::NOTHING) {
+                break;
+            }
+        }
+
+        return just_cast<T>(ret);
+    }
+
     void _specifyOnModeChange(char);
 
 
@@ -123,8 +144,6 @@ private:
     QQuickView *m_appViewer = nullptr;
     QList<Device*> m_devices;
     QList<Processor*> m_processors;
-
-    bool m_auto = false;
 };
 
 #endif // DEVICESMODEL_H

@@ -19,6 +19,9 @@ public:
     void process(Device&, FDR&);
     void process(Device&, Flashing&);
 
+protected:
+    cvoid value(const size_t, cvoid);
+
 private:
     QString m_file;
     QXlsx::Document m_report;

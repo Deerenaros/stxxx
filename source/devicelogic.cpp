@@ -2,9 +2,7 @@
 
 #include "devicesmodel.h"
 
-DeviceLogic::DeviceLogic()
-{
-
+DeviceLogic::DeviceLogic() {
 }
 
 void DeviceLogic::process(Device &dev, Starting& data) {
@@ -85,7 +83,7 @@ void DeviceLogic::process(Device &dev, FDR& data) {
     Q_UNUSED(dev);
 
     if(data.submode != FDR::START) {
-        if(automate && data.line1 != char(7) && data.line2 != char(8)) {
+        if(m_automate && data.line1 != char(7) && data.line2 != char(8)) {
             // dev.write(_nextSwitch(data.line1, data.line2));
             // emit m_model->pinsChanged(m_waitingSwitch.first, m_waitingSwitch.second);
         }
@@ -126,5 +124,25 @@ void DeviceLogic::process(Device &dev, Flashing& flash) {
     default:
         dev.flash();
         break;
+    }
+}
+
+cvoid DeviceLogic::value(const size_t name, cvoid p) {
+    switch(name) {
+    case "series"_h:
+        return reinterpret_cast<cvoid>(
+                    p == TAKE
+                        ? m_series
+                        : m_series = const_cast<QXYSeries*>(reinterpret_cast<const QXYSeries*>(p))
+                );
+    case "automate"_h:
+        qdebug("cast") << (m_automate ? "true" : "false");
+        return reinterpret_cast<cvoid>(
+                    p == TAKE
+                        ? m_automate
+                        : m_automate = (p != reinterpret_cast<cvoid>(false))
+                );
+    default:
+        return NOTHING;
     }
 }

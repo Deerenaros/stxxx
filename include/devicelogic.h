@@ -17,7 +17,6 @@ class DeviceLogic : public Processor
     static const int AMPLIFIER_BYTE_SHIFT = 110;
 
 public:
-    bool automate = false;
 
     DeviceLogic();
 
@@ -30,7 +29,11 @@ public:
     void process(Device&, FDR&);
     void process(Device&, Flashing&);
 
+protected:
+    cvoid value(const size_t, cvoid);
+
 private:
+    bool m_automate = false;
     QVector<QPointF> m_amplifier;
     QXYSeries *m_series = nullptr;
 };
