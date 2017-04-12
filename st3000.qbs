@@ -13,7 +13,6 @@ CppApplication {
         "include/device.h",
         "include/devicesmodel.h",
         "include/packets.h",
-        "include/qml_packets.h",
         "main.cpp",
         "qml.qrc",
         "resources/Amplifier.qml",

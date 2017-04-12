@@ -13,11 +13,11 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include <QAreaSeries>
 #include <QQuickView>
 #include <QList>
+#include <QVariantMap>
+#include <QXYSeries>
 
 #include "betterdebug.h"
 #include "devicesmodel.h"
@@ -45,8 +45,15 @@ DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
 
             connect(dev, &Device::packetRead, this, &DeviceModel::_packetRX);
             connect(dev, &Device::deviceError, this, &DeviceModel::deviceError);
+            connect(dev, &Device::pinsChanged, [this](Device *dev) {
+                emit pinsChanged(dev->current.a, dev->current.b);
+            });
         }
     }
+
+    QVariantMap fdr;
+    fdr.insert("set", 1);
+    m_properties["fdr"] = fdr;
 
     if(m_devices.count() > 0) {
         m_currentDevice = 0;
@@ -103,9 +110,7 @@ int DeviceModel::getCount() const {
 }
 
 bool DeviceModel::getAuto() const {
-    bool a = _getValue<bool>("automate");
-    qdebug("cast") << (a ? "!true" : "!false");
-    return a;
+    return _getValue<bool>("automate");
 }
 
 bool DeviceModel::isReady() const {
@@ -113,6 +118,15 @@ bool DeviceModel::isReady() const {
         && m_currentDevice < m_devices.size()
         && m_devices[m_currentDevice] != nullptr
         && m_devices[m_currentDevice]->isReady();
+}
+
+QVariantMap DeviceModel::getProperties() const {
+    return m_properties;
+}
+
+void DeviceModel::setProperties(QVariantMap properties) {
+    m_properties = properties;
+    emit propertiesChanged();
 }
 
 void DeviceModel::closeAll() {
@@ -165,8 +179,13 @@ void DeviceModel::setMode(char mode) {
 void DeviceModel::specifyMode() {
 }
 
-void DeviceModel::setSeries(QAbstractSeries* series) {
-    _setValues("series", series);
+void DeviceModel::setSpectrum(QAbstractSeries* series) {
+    _setValues("spectrum", series);
+    // m_series = static_cast<QXYSeries*>(series);
+}
+
+void DeviceModel::setAmpl(QAbstractSeries* series) {
+    _setValues("ampl", series);
     // m_series = static_cast<QXYSeries*>(series);
 }
 
@@ -185,6 +204,7 @@ void DeviceModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8
 
 void DeviceModel::setAuto(bool automate) {
     _setValues("automate", automate);
+    emit autoChanged();
 }
 
 void DeviceModel::setVelocityFactor(double factor) {

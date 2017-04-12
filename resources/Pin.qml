@@ -13,7 +13,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
 
@@ -48,6 +47,8 @@ Rectangle {
         anchors.fill: parent
         onClicked: {
             select()
+
+            devicesModel.automate = false
         }
     }
 
@@ -55,10 +56,6 @@ Rectangle {
         if(usable) {
             if(parent.parent.selected) {
                 parent.parent.selected.deselect()
-            }
-
-            if(devicesModel.automate) {
-                devicesModel.automate = false
             }
 
             devicesModel.setPins(first, second)

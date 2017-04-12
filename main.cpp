@@ -19,8 +19,8 @@
 
 /// \todo Рефлектометр: графика {deadline: "04/13/17"}
 /// \todo Создание отчёта и сохранение результатов {deadline: "04/13/17"}
-/// \todo Статическая линковка
-/// \todo Ещё Меньше Лапши
+/// \todo Статическая линковка {deadline: "never"}
+/// \todo Ещё Меньше Лапши, МЕНЬШЕ! {deadline: "never"}
 
 // #include <QtPlugin>
 // Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)

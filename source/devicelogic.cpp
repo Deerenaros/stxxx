@@ -1,3 +1,18 @@
+//    include/devicelogic.h is part of STx
+//
+//    STx is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    STx is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "devicelogic.h"
 
 #include "devicesmodel.h"
@@ -8,7 +23,7 @@ DeviceLogic::DeviceLogic() {
 void DeviceLogic::process(Device &dev, Starting& data) {
     process(dev, data.battery);
 
-    emit model->pinsChanged(data.line1, data.line2);
+    emit model->pinsChanged(data.pins.a, data.pins.b);
 
     auto &s = data.settings;
     switch(data.currentMode) {
@@ -27,8 +42,8 @@ void DeviceLogic::process(Device &dev, Battery& data) {
 void DeviceLogic::process(Device &dev, Switch& data) {
     Q_UNUSED(dev);
 
-    qint8 input = data.line1;
-    qint8 output = data.line2;
+    qint8 input = data.pins.a;
+    qint8 output = data.pins.b;
     double dc = data.ac / SWITCH_ACDC_SCALE;
     double ac = data.dc / SWITCH_ACDC_SCALE;
 
@@ -62,8 +77,8 @@ void DeviceLogic::process(Device &dev, Amplifier& data) {
         m_amplifier[i].rx() -= sizeof(data.oscillogramme.data);
     }
 
-    if(m_series != nullptr) {
-        m_series->replace(m_amplifier);
+    if(m_ampl != nullptr) {
+        m_ampl->replace(m_amplifier);
     }
 
     emit model->amplifierSignal(size);
@@ -82,15 +97,36 @@ void DeviceLogic::process(Device &dev, NLD& data) {
 void DeviceLogic::process(Device &dev, FDR& data) {
     Q_UNUSED(dev);
 
-    if(data.submode != FDR::START) {
-        if(m_automate && data.line1 != char(7) && data.line2 != char(8)) {
-            // dev.write(_nextSwitch(data.line1, data.line2));
-            // emit m_model->pinsChanged(m_waitingSwitch.first, m_waitingSwitch.second);
+
+//    min: 200.0
+//    max: 205000.6
+
+    if(data.submode == FDR::SPECTRUM) {
+        qdebug("fdr") << "spectrum";
+        if(data.number == 0) {
+            QVector<QPointF> some;
+            some << QPointF(0, 0) << QPointF(520, 255);
+            m_spectrum.clear();
+            m_spec->replace(some);
+        }
+
+        int i = m_spectrum.size();
+        for(auto byte = std::begin(data.spectrum); byte != std::end(data.spectrum); byte++) {
+            m_spectrum.append(QPointF(i++, (*byte) - AMPLIFIER_BYTE_SHIFT));
+        }
+
+        if(data.number == 3) {
+            qdebug("fdr") << "spectrum replaced by " << m_spectrum.size() << " points";
+            m_spec->replace(m_spectrum);
+        }
+    } else if(data.submode == FDR::OK) {
+        if(m_automate && !data.pins.is(m_stop)) {
+            dev.setPins(dev.current.next());
         }
 
         if(data.size > 0) {
             QList<QPair<double, int>> list;
-            int a = data.line1, b = data.line2;
+            int a = data.pins.a, b = data.pins.b;
 
             for(qint8 i = 0; i < data.size; i++) {
                 list << QPair<double, int>(data.measments[i].len / 10., data.measments[i].lvl);
@@ -106,10 +142,10 @@ void DeviceLogic::process(Device &dev, FDR& data) {
 
             emit model->fdrSignal(2, a, b, list.first().first, list.first().second);
         } else {
-            emit model->fdrSignal(-1, data.line1, data.line2, 0, 0);
+            emit model->fdrSignal(-1, data.pins.a, data.pins.b, 0, 0);
         }
-    } else {
-        emit model->fdrSignal(0, data.line1, data.line2, 0, 0);
+    } else if(data.submode == FDR::START) {
+        emit model->fdrSignal(0, data.pins.a, data.pins.b, 0, 0);
     }
 }
 
@@ -129,19 +165,29 @@ void DeviceLogic::process(Device &dev, Flashing& flash) {
 
 cvoid DeviceLogic::value(const size_t name, cvoid p) {
     switch(name) {
-    case "series"_h:
+    case "spectrum"_h:
         return reinterpret_cast<cvoid>(
                     p == TAKE
-                        ? m_series
-                        : m_series = const_cast<QXYSeries*>(reinterpret_cast<const QXYSeries*>(p))
+                        ? m_spec
+                        : m_spec = const_cast<QXYSeries*>(reinterpret_cast<const QXYSeries*>(p))
+                );
+    case "ampl"_h:
+        return reinterpret_cast<cvoid>(
+                    p == TAKE
+                        ? m_ampl
+                        : m_ampl = const_cast<QXYSeries*>(reinterpret_cast<const QXYSeries*>(p))
                 );
     case "automate"_h:
-        qdebug("cast") << (m_automate ? "true" : "false");
-        return reinterpret_cast<cvoid>(
-                    p == TAKE
-                        ? m_automate
-                        : m_automate = (p != reinterpret_cast<cvoid>(false))
-                );
+        if(p != TAKE) {
+            m_automate = (p != reinterpret_cast<cvoid>(false));
+            if(m_automate) {
+                // WUT? WUT I HAVE TO DO WHERE?
+            } else {
+                // m_stop = Pins(0, 0);
+            }
+        }
+
+        return reinterpret_cast<cvoid>(m_automate);
     default:
         return NOTHING;
     }

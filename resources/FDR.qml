@@ -13,7 +13,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
 
@@ -38,7 +37,7 @@ Item {
         FDRResults {
             id: firstSet
 
-            header: qsTr("SET #1")
+            set: 1
             active: true
 
             Layout.column: 0
@@ -48,7 +47,8 @@ Item {
         FDRResults {
             id: secondSet
 
-            header: qsTr("SET #2")
+            set: 2
+            active: false
 
             Layout.column: 1
             Layout.row: 0

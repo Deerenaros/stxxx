@@ -18,6 +18,7 @@
 
 Device::Device(const QString& name, const QSerialPortInfo &portInfo, QObject *parent)
     : QThread(parent)
+    , current(0, 0)
     , m_name(name)
     , m_portInfo(portInfo)
 {
@@ -129,6 +130,31 @@ void Device::write(const QByteArray &data) {
     qdebug("writen") << "<< " << str2;
 }
 
+
+void Device::_process(Packet *p) {
+    Pins last = current;
+    switch (p->mod) {
+    case Modes::Rx::SWITCH:
+        current = p->data.swtch.pins;
+        break;
+    case Modes::Rx::STARTING:
+        current = p->data.starting.pins;
+        break;
+    case Modes::Rx::FDR:
+        current = p->data.fdr.pins;
+        break;
+    case Modes::Rx::NLD:
+        current = p->data.nld.pins;
+        break;
+    default:
+        break;
+    }
+
+    if(!last.is(current)) {
+        emit pinsChanged(this);
+    }
+}
+
 void Device::run() {
     for(;;) {
         LOCKEDX( auto data = (isReady() ? m_port->readAll() : QByteArray()) );
@@ -151,7 +177,9 @@ void Device::run() {
 
                     clearPacket();
                     m_packet = new QByteArray(buff);
-                    emit packetRead(this, reinterpret_cast<Packet*>(m_packet->data()));
+                    auto p = reinterpret_cast<Packet*>(m_packet->data());
+                    _process(p);
+                    emit packetRead(this, p);
 
                     buff.clear();
                     strBuf.clear();
@@ -235,6 +263,11 @@ void Device::close() {
     }
 }
 
+void Device::setPins(Pins pins) {
+    char buff[] = {Modes::Tx::SWITCH, char(1), char(pins.a), char(pins.b)};
+    write(QByteArray(buff, 4));
+}
+
 static quint32 size, send, step, progress=0, cnt;
 
 
@@ -242,6 +275,12 @@ static quint32 size, send, step, progress=0, cnt;
 /// \todo Добавить таймаут на подверждение прошивки
 /// \todo Уменьшить размер пакета до 100
 void Device::flash(QString fileName) {
+    Q_UNUSED(size);
+    Q_UNUSED(send);
+    Q_UNUSED(step);
+    Q_UNUSED(progress);
+    Q_UNUSED(cnt);
+
     QByteArray str;
     quint32 tmp;
     quint8 i;

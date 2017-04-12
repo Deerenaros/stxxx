@@ -19,6 +19,21 @@
 
 #include <QObject>
 #include <QVariant>
+//    include/devicesmodel.h is part of STx
+//
+//    STx is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    STx is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
 #include <QVariantList>
 #include <QAbstractItemModel>
 #include <QMap>
@@ -51,6 +66,8 @@ class DeviceModel
     Q_PROPERTY(bool automate READ getAuto WRITE setAuto NOTIFY autoChanged)
     Q_PROPERTY(bool isReady READ isReady)
     Q_PROPERTY(int count READ getCount NOTIFY countChanged)
+
+    Q_PROPERTY(QVariantMap properties READ getProperties WRITE setProperties NOTIFY propertiesChanged)
 
 public:
     explicit DeviceModel(QQuickView *appViewer, QObject *parent = 0);
@@ -85,12 +102,16 @@ signals:
     void pinsChanged(int a, int b);
     void firmwareError(QString error);
     void processed();
+    void propertiesChanged();
 
     int currentChanged();
     void countChanged();
     void autoChanged();
 
 public slots:
+    QVariantMap getProperties() const;
+    void setProperties(QVariantMap);
+
     void closeAll();
     void setCurrent(int);
     void retake();
@@ -98,7 +119,8 @@ public slots:
     void setAuto(bool);
     void setMode(char);
     void specifyMode();
-    void setSeries(QAbstractSeries*);
+    void setAmpl(QAbstractSeries*);
+    void setSpectrum(QAbstractSeries*);
     void setPins(int, int);
     void setVelocityFactor(double factor);
     void flashCurrent(QString);
@@ -120,7 +142,6 @@ private:
         }
     }
 
-    // bool still do not works
     template <typename T>
     T _getValue(const char *name) const {
         cvoid ret = Processor::NOTHING;
@@ -144,6 +165,8 @@ private:
     QQuickView *m_appViewer = nullptr;
     QList<Device*> m_devices;
     QList<Processor*> m_processors;
+
+    QVariantMap m_properties;
 };
 
 #endif // DEVICESMODEL_H

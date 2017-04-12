@@ -13,7 +13,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "application.h"
 
 #include <QStandardPaths>
@@ -29,6 +28,8 @@ Application::Application(int &argc, char **argv)
     , m_viewer()
     , m_model(&m_viewer)
 {
+    qdebug("app") << "Current directory is " << QDir::currentPath();
+
     m_model.bind(new DeviceLogic());
     m_model.bind(new Report("report.xlsx"));
 
@@ -42,7 +43,6 @@ Application::Application(int &argc, char **argv)
 
     connect(m_viewer.engine(), &QQmlEngine::quit, &m_viewer, &QWindow::close);
     connect(this, &QApplication::aboutToQuit, &m_model, &DeviceModel::closeAll);
-    connect(&m_viewer, SIGNAL(event()), this, SLOT(onEvent()));
 }
 
 void Application::onEvent() {

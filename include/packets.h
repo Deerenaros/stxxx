@@ -19,7 +19,7 @@
 #include <QtGlobal>
 
 #pragma pack(push, 1)
-#define MAX_PACKET_SIZE 256
+#define MAX_PACKET_SIZE 255
 #define permanent static constexpr
 
 typedef qint8 mode;
@@ -71,18 +71,47 @@ struct Constants {
     permanent quint8 wideFQ = 1;
 };
 
+
+struct Pins {
+    permanent quint8 N = 8;
+
+    quint8 a;
+    quint8 b;
+
+    Pins(quint8 a, quint8 b) {
+        this->a = a;
+        this->b = b;
+    }
+
+    Pins next() {
+        return Pins(
+            a + (b + 1)/9,
+            (b + 1) % 9
+        );
+    }
+
+    bool is(quint8 a, quint8 b) {
+        return this->a == a && this->b == b;
+    }
+
+    bool is(Pins other) {
+        return a == other.a && b == other.b;
+    }
+};
+
+
 struct Flashing {
     quint8 status;
 };
 
 struct Cable {
-    quint8 cableType;           ///< cable's type
-    quint8 cableMask;           ///< cable's using pins' mask
+    quint8 cableType;       ///< cable's type
+    quint8 cableMask;       ///< cable's using pins' mask
 };
 
 struct Battery {
-    quint8 charge;              ///< Current charge (0~5)
-    quint8 isCharging;          ///< Is currently charging
+    quint8 charge;          ///< Current charge (0~5)
+    quint8 isCharging;      ///< Is currently charging
 };
 
 struct Starting {
@@ -146,11 +175,10 @@ struct Starting {
         Cable info;
     };
 
-    quint8  currentMode;         ///< Current working mode
-    quint8  line1;               ///< Current first line (0~8)
-    quint8  line2;               ///< Current second line (0~8)
-    quint8  isSwitcher;          ///< Is switcher on
-    quint8  isHighVoltage;       ///< Is voltage excessed
+    quint8  currentMode;    ///< Current working mode
+    Pins    pins;           ///< Current lines (0~8, 0~8)
+    quint8  isSwitcher;     ///< Is switcher on
+    quint8  isHighVoltage;  ///< Is voltage excessed
     Battery battery;
 
     union {
@@ -187,8 +215,7 @@ struct Amplifier {
 struct Switch {
     quint16 dc;
     quint16 ac;
-    quint8  line1;
-    quint8  line2;
+    Pins   pins;            ///< Current lines (0~8, 0~8)
 };
 
 struct Receiver {
@@ -220,19 +247,24 @@ struct Receiver {
 };
 
 struct NLD {
-    quint8 red;                 ///< red level (0~250)
-    quint8 blue;                ///< blue level (0~250)
-    quint8 white;               ///< white level (0~250)
-    quint8 line1;
-    quint8 line2;
-    quint8 signalLevel;         ///< Signal's level (0~4)
+    quint8 red;             ///< red level (0~250)
+    quint8 blue;            ///< blue level (0~250)
+    quint8 white;           ///< white level (0~250)
+    Pins   pins;            ///< Current lines (0~8, 0~8)
+    quint8 signalLevel;     ///< Signal's level (0~4)
 };
 
 struct FDR {
+    permanent size_t SPECTRUM_SIZE = 130;
+
     enum _submodes {
         START = 0,
         OK = 1,
         TABLE = 2,
+        NOISE = 3,
+        OVERVOLT = 4,
+        ANALYSE = 5,
+        SPECTRUM = 6,
     };
 
     struct Measure {
@@ -241,14 +273,18 @@ struct FDR {
     };
 
     quint8 submode;
-    quint8 size;
-    quint8 line1;
-    quint8 line2;
+
+    union {
+        quint8 size;        ///< Number of measurements
+        quint8 number;      ///< Packet number for spectrum
+    };
+
+    Pins   pins;            ///< Current lines (0~8, 0~8)
 
     union {
         FDR::Measure measure;
-
         FDR::Measure measments[MAX_PACKET_SIZE];
+        quint8 spectrum[SPECTRUM_SIZE];
     };
 };
 

@@ -13,7 +13,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef DEVICE_H
 #define DEVICE_H
 
@@ -47,15 +46,15 @@ class Device
 
     static quint8 checkESC (quint8 byte);
 
+signals:
+    void pinsChanged(Device*);
+
 public:
+    Pins current;
+
     enum Error {
         FIRMWARE
     };
-
-    struct Pins {
-        quint8 first;
-        quint8 second;
-    } pins;
 
     friend class DevicesModel;
 
@@ -74,6 +73,8 @@ public:
     void write(const QByteArray &data);
     QByteArray read();
 
+    void setPins(Pins pins);
+
 signals:
     void packetRead(Device* sender, Packet* data);
     void deviceError(QString error, Error type = FIRMWARE);
@@ -85,6 +86,8 @@ protected:
     void run();
 
 private:
+    void _process(Packet *p);
+
     QString strBuf;
     bool esc = false;
     quint8 step = 0, crc = 0;

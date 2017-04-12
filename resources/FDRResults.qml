@@ -13,7 +13,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4
@@ -22,7 +21,7 @@ import QtQuick.Controls 1.4
 Item {
     id: resultsRoot
 
-    property string header: ""
+    property int set: 0
     property bool active: false
     property bool busy: false
 
@@ -38,7 +37,7 @@ Item {
             Layout.preferredHeight: 25
             Layout.fillWidth: true
             Text {
-                text: (busy ? "..." : header)
+                text: (busy ? "..." : qsTr("SET #") + set)
                 font.bold: active
 
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -52,6 +51,7 @@ Item {
                             active = true
                             resultsRoot.parent.currentSet.active = false
                             resultsRoot.parent.currentSet = resultsRoot
+                            devicesModel.properties.fdr.set = resultsRoot.set
                             devicesModel.retake()
                         }
                     }

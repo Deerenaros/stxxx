@@ -1,3 +1,18 @@
+//    include/processor.h is part of STx
+//
+//    STx is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    STx is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
 
@@ -17,19 +32,21 @@ TO just_cast(FROM val) {
 class Processor
 {
 public:
-    permanent cvoid NOTHING = "";
-    permanent cvoid TAKE    = "";
+    permanent cvoid NOTHING = reinterpret_cast<cvoid>(0xC0000001);
+    permanent cvoid TAKE    = reinterpret_cast<cvoid>(0xC0000002);
 
     void setModel(DeviceModel* m) {model = m;}
 
     virtual void process(Device&, Starting&) = 0;
     virtual void process(Device&, Battery&) = 0;
     virtual void process(Device&, Amplifier&) = 0;
-    virtual void process(Device&, Switch&) = 0;
+    virtual void process(Device&, Switch&r) = 0;
     virtual void process(Device&, Receiver&) = 0;
     virtual void process(Device&, NLD&) = 0;
     virtual void process(Device&, FDR&) = 0;
     virtual void process(Device&, Flashing&) = 0;
+
+    // virtual void process(Device&, QString&) = 0;
 
 
 protected:

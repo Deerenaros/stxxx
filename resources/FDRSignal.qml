@@ -13,7 +13,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
 import QtCharts 2.1
@@ -23,19 +22,36 @@ Rectangle {
     Layout.fillWidth: true
 
     ChartView {
+        id: chart
+
         title: "Line"
         anchors.fill: parent
         antialiasing: true
 
+        ValueAxis {
+            id: axisY
+            min: 0
+            max: 255
+        }
+
+        ValueAxis {
+            id: axisX
+            titleText: "meters"
+            min: 0
+            max: 520
+        }
+
         LineSeries {
-            name: "LineSeries"
-            XYPoint { x: 0; y: 0 }
-            XYPoint { x: 1.1; y: 2.1 }
-            XYPoint { x: 1.9; y: 3.3 }
-            XYPoint { x: 2.1; y: 2.1 }
-            XYPoint { x: 2.9; y: 4.9 }
-            XYPoint { x: 3.4; y: 3.0 }
-            XYPoint { x: 4.1; y: 3.3 }
+            name: "spectrum"
+            axisX: axisX
+            axisY: axisY
+            useOpenGL: false
+        }
+
+        Component.onCompleted: {
+            console.log(chart.series(0))
+            devicesModel.properties.fdr.series = chart.series(0)
+            devicesModel.setSpectrum(chart.series(0))
         }
     }
 }
