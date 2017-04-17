@@ -84,9 +84,16 @@ struct Pins {
     }
 
     Pins next() {
+        // HOOOOLY SHIT!
         return Pins(
-            a + (b + 1)/9,
-            (b + 1) % 9
+            (a == 7 && b == 8
+                ? 1
+                : a + (b + 1)/9),
+            (b == 8
+                ? ((a == 7 && b == 8
+                    ? 1
+                    : a + (b + 1)/9) + 1)
+                : (b + 1) % 9)
         );
     }
 

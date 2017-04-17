@@ -203,8 +203,11 @@ void DeviceModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8
 }
 
 void DeviceModel::setAuto(bool automate) {
-    _setValues("automate", automate);
-    emit autoChanged();
+    bool value = _getValue<bool>("automate");
+    if(value != automate) {
+        _setValues("automate", automate, &currentDevice());
+        emit autoChanged();
+    }
 }
 
 void DeviceModel::setVelocityFactor(double factor) {
@@ -221,6 +224,7 @@ void DeviceModel::flashCurrent(QString fileName) {
 }
 
 void DeviceModel::deviceError(QString error, Device::Error type) {
+    Q_UNUSED(type);
     emit firmwareError(error);
 }
 

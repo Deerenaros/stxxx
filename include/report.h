@@ -17,6 +17,7 @@
 #define REPORT_H
 
 #include <QtXlsx/QtXlsx>
+#include <QVariantMap>
 
 #include "processor.h"
 #include "betterdebug.h"
@@ -39,7 +40,7 @@ public:
     void process(Device&, Flashing&);
 
 protected:
-    cvoid value(const size_t, cvoid);
+    cvoid value(const size_t, cvoid, Device*);
 
 private:
     QString m_file;

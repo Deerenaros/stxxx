@@ -42,6 +42,9 @@ Item {
 
             Layout.column: 0
             Layout.row: 0
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
         }
 
         FDRResults {
@@ -52,17 +55,26 @@ Item {
 
             Layout.column: 1
             Layout.row: 0
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
         }
 
         FDRControls {
             Layout.column: 2
             Layout.row: 0
+
+            Layout.fillHeight: true
+            Layout.fillWidth: true
         }
 
         FDRSignal {
             Layout.column: 0
             Layout.columnSpan: 3
             Layout.row: 1
+
+            Layout.fillHeight: true
+            Layout.fillWidth: true
         }
 
         PINSelector {

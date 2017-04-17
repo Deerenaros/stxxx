@@ -34,7 +34,7 @@ Item {
     property var pins: []
     property var selected: null
     property bool values: false
-    property int maxlvl: 100
+    property int maxlvl: 1
 
     Layout.fillWidth: true
     Layout.fillHeight: true
@@ -65,7 +65,7 @@ Item {
 
             pins.push([])
             for(var k = 1; k <= 8; k++) {
-                a = {first: i, second: 9, usable: false};
+                a = {first: k, second: 9, usable: false};
                 pins[pins.length-1].push(create("Pin.qml", a, pinslayout));
                 if(values) {
                     create("FDRItem.qml", a, pinslayout);

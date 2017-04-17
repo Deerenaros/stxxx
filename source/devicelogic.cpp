@@ -101,26 +101,29 @@ void DeviceLogic::process(Device &dev, FDR& data) {
 //    min: 200.0
 //    max: 205000.6
 
+    static quint8 hi;
     if(data.submode == FDR::SPECTRUM) {
         qdebug("fdr") << "spectrum";
         if(data.number == 0) {
-            QVector<QPointF> some;
-            some << QPointF(0, 0) << QPointF(520, 255);
             m_spectrum.clear();
-            m_spec->replace(some);
+            hi = 0;
         }
 
-        int i = m_spectrum.size();
-        for(auto byte = std::begin(data.spectrum); byte != std::end(data.spectrum); byte++) {
-            m_spectrum.append(QPointF(i++, (*byte) - AMPLIFIER_BYTE_SHIFT));
+        int i = m_spectrum.count();
+        for(auto byte = std::begin(data.spectrum); byte != std::end(data.spectrum); byte++, i++) {
+            if(m_spectrum.count() && byte) {
+                m_spectrum.append(QPointF(i/2.1f, m_spectrum.at(m_spectrum.count()-1).y()));
+            }
+
+            m_spectrum.append(QPointF(i/2.1f, *byte));
+            hi = (*byte > hi ? *byte : hi);
         }
 
         if(data.number == 3) {
-            qdebug("fdr") << "spectrum replaced by " << m_spectrum.size() << " points";
-            m_spec->replace(m_spectrum);
+            m_spec->setUpperSeries(&m_spectrum);
         }
     } else if(data.submode == FDR::OK) {
-        if(m_automate && !data.pins.is(m_stop)) {
+        if(m_automate && !data.pins.next().is(m_stop)) {
             dev.setPins(dev.current.next());
         }
 
@@ -135,11 +138,11 @@ void DeviceLogic::process(Device &dev, FDR& data) {
             for(auto &item: list) {
                 emit model->fdrSignal(1, a, b, item.first, item.second);
             }
+            emit model->fdrSpectrum(0.8*list.first().first, 1.2*list.last().first, 1.1*hi);
 
             qSort(list.begin(), list.end(), [](QPair<double, int> a, QPair<double, int> b) {
                 return a.second > b.second;
             });
-
             emit model->fdrSignal(2, a, b, list.first().first, list.first().second);
         } else {
             emit model->fdrSignal(-1, data.pins.a, data.pins.b, 0, 0);
@@ -163,13 +166,13 @@ void DeviceLogic::process(Device &dev, Flashing& flash) {
     }
 }
 
-cvoid DeviceLogic::value(const size_t name, cvoid p) {
+cvoid DeviceLogic::value(const size_t name, cvoid p, Device *dev) {
     switch(name) {
     case "spectrum"_h:
         return reinterpret_cast<cvoid>(
                     p == TAKE
                         ? m_spec
-                        : m_spec = const_cast<QXYSeries*>(reinterpret_cast<const QXYSeries*>(p))
+                        : m_spec = const_cast<QAreaSeries*>(reinterpret_cast<const QAreaSeries*>(p))
                 );
     case "ampl"_h:
         return reinterpret_cast<cvoid>(
@@ -181,9 +184,8 @@ cvoid DeviceLogic::value(const size_t name, cvoid p) {
         if(p != TAKE) {
             m_automate = (p != reinterpret_cast<cvoid>(false));
             if(m_automate) {
-                // WUT? WUT I HAVE TO DO WHERE?
-            } else {
-                // m_stop = Pins(0, 0);
+                m_stop = dev->current;
+                qdebug("fdr") << "stop auto @" << m_stop.a << "," << m_stop.b;
             }
         }
 

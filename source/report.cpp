@@ -67,11 +67,13 @@ void Report::process(Device &dev, FDR &data) {
         quint8 a = data.pins.a, b = data.pins.b, n = data.pins.N - 1;
         // sum of arithmetic progression's members with shift by second pin, doubled
         int col = ( (a-1)*(2*n-(a-2))/2 ) + ( b-a ); col = col*2 - 1;
-        int offset = (model->getProperties().value("set").toInt() == 1
+        QVariantMap fdr = qvariant_cast<QVariantMap>(model->getProperties().value("fdr"));
+        qdebug("fdr") << fdr.value("set").toInt();
+        int offset = (fdr.value("set").toInt() == 1
                       ? 0
                       : FDR_HEADER_SIZE + MAX_FDR_DATASET);
 
-        m_report.mergeCells(QXlsx::CellRange(offset + 1, col, offset + 1, col+1));
+        //m_report.mergeCells(QXlsx::CellRange(offset + 1, col, offset + 1, col+1));
 
         QXlsx::Format fmtTitle;
         fmtTitle.setHorizontalAlignment(QXlsx::Format::AlignHCenter);
@@ -98,8 +100,9 @@ void Report::process(Device &dev, Flashing &flash) {
     Q_UNUSED(flash);
 }
 
-cvoid Report::value(const size_t name, cvoid p) {
+cvoid Report::value(const size_t name, cvoid p, Device *dev) {
     Q_UNUSED(p);
+    Q_UNUSED(dev);
     switch(name) {
     default:
         return NOTHING;

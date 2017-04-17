@@ -19,8 +19,7 @@ import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4
 
 Item {
-    Layout.fillHeight: true
-    Layout.fillWidth: true
+
 
     RowLayout {
         anchors.fill: parent
@@ -44,7 +43,11 @@ Item {
                 text: devicesModel.automate ? qsTr("Stop") : qsTr("Scan")
 
                 onClicked: {
-                    devicesModel.automate = !devicesModel.automate
+                    var auto = !devicesModel.automate
+                    devicesModel.automate = auto
+                    if(auto) {
+                        devicesModel.retake()
+                    }
                 }
             }
 

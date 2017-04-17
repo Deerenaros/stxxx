@@ -103,6 +103,7 @@ signals:
     void firmwareError(QString error);
     void processed();
     void propertiesChanged();
+    void fdrSpectrum(double left, double right, double hi);
 
     int currentChanged();
     void countChanged();
@@ -136,9 +137,9 @@ private slots:
 
 private:
     template <typename T>
-    void _setValues(const char *name, T ptr) {
+    void _setValues(const char *name, T ptr, Device *dev = nullptr) {
         for(Processor *p: m_processors) {
-            p->value(name, ptr);
+            p->value(name, ptr, dev);
         }
     }
 

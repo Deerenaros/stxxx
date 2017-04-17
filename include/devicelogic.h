@@ -18,6 +18,8 @@
 
 #include <QAbstractSeries>
 #include <QXYSeries>
+#include <QAreaSeries>
+#include <QLineSeries>
 
 #include "betterdebug.h"
 #include "processor.h"
@@ -47,16 +49,16 @@ public:
     void process(Device&, QString&);
 
 protected:
-    cvoid value(const size_t, cvoid);
+    cvoid value(const size_t, cvoid, Device*);
 
 private:
     Pins m_stop = Pins(7, 8);
 
     bool m_automate = false;
     QVector<QPointF> m_amplifier;
-    QVector<QPointF> m_spectrum;
+    QLineSeries m_spectrum;
     QXYSeries *m_ampl = nullptr;
-    QXYSeries *m_spec = nullptr;
+    QAreaSeries *m_spec = nullptr;
 };
 
 #endif // DEVICELOGIC_H

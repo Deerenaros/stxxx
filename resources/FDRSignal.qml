@@ -18,13 +18,12 @@ import QtQuick.Layouts 1.1
 import QtCharts 2.1
 
 Rectangle {
-    Layout.fillHeight: true
-    Layout.fillWidth: true
+
 
     ChartView {
         id: chart
 
-        title: "Line"
+        title: ""
         anchors.fill: parent
         antialiasing: true
 
@@ -41,17 +40,43 @@ Rectangle {
             max: 520
         }
 
-        LineSeries {
+        AreaSeries {
+            id: spectrum
             name: "spectrum"
             axisX: axisX
             axisY: axisY
             useOpenGL: false
         }
 
+        MouseArea {
+            anchors.fill: parent;
+
+            onPressed: {
+                var pos = chart.mapToValue(Qt.point(mouseX, mouseY), spectrum)
+                chart.title = pos.x.toFixed(1) + "m: " + pos.y.toFixed(1)
+            }
+
+            onMouseXChanged: {
+                var pos = chart.mapToValue(Qt.point(mouseX, mouseY), spectrum)
+                chart.title = pos.x.toFixed(1) + "m: " + pos.y.toFixed(1)
+            }
+
+            onReleased: {
+                chart.title = ""
+            }
+        }
+
         Component.onCompleted: {
-            console.log(chart.series(0))
-            devicesModel.properties.fdr.series = chart.series(0)
             devicesModel.setSpectrum(chart.series(0))
+        }
+
+        Connections {
+            target: devicesModel
+            onFdrSpectrum: {
+                axisX.min = left;
+                axisX.max = right;
+                axisY.max = hi;
+            }
         }
     }
 }

@@ -50,14 +50,14 @@ public:
 
 
 protected:
-    virtual cvoid value(const size_t, cvoid) = 0;
+    virtual cvoid value(const size_t, cvoid, Device*) = 0;
 
     DeviceModel* model;
 
 public:
     template<typename T>
-    T value(const char *name, T data) {
-        cvoid ret = value(hash(name), reinterpret_cast<cvoid>(data));
+    T value(const char *name, T data, Device *dev = nullptr) {
+        cvoid ret = value(hash(name), reinterpret_cast<cvoid>(data), dev);
         return just_cast<T>(ret);
     }
 };

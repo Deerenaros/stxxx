@@ -43,7 +43,7 @@ ScrollView {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
 
-                text: len + "m, " + level + "dB"
+                text: len + "m"
                 color: "black"
             }
         }

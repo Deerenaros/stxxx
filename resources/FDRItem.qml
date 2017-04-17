@@ -31,7 +31,8 @@ Item {
     property var measurments: []
     property var colors: ["silver", "gainsboro"]
     property var pairColors: ["tan", "wheat"]
-    property real g: lvl/parent.parent.maxlvl
+    property var p: parent.parent
+    property real g: lvl/p.maxlvl
 
     Layout.fillHeight: true
     Layout.fillWidth: true
@@ -41,6 +42,19 @@ Item {
             || (a === 3 && b === 6)
             || (a === 4 && b === 5)
             || (a === 7 && b === 8)
+    }
+
+    Connections {
+        target: devicesModel
+        onFdrSignal: {
+            if(what == 2) {
+                if(first == a && second == b) {
+                    p.maxlvl = Math.max(p.maxlvl, lvl);
+                    switchItem.lvl = lvl
+                    switchItem.len = len
+                }
+            }
+        }
     }
 
     Component.onCompleted: {

@@ -17,8 +17,8 @@
 //#define DEBUG_TO_STD
 #define DEBUG_TO_NET
 
-/// \todo Рефлектометр: графика {deadline: "04/13/17"}
-/// \todo Создание отчёта и сохранение результатов {deadline: "04/13/17"}
+/// \todo Вылизывание рефлектометра {deadline: "never"}
+/// \todo Добавление в отчёт графики {deadline: "04/21/17"}
 /// \todo Статическая линковка {deadline: "never"}
 /// \todo Ещё Меньше Лапши, МЕНЬШЕ! {deadline: "never"}
 

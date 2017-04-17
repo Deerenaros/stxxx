@@ -25,9 +25,6 @@ Item {
     property bool active: false
     property bool busy: false
 
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-
     ListModel {
         id: resultModel
     }
