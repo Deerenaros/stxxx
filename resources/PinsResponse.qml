@@ -42,7 +42,7 @@ Item {
             for(var i = 1; i <= 7; i++) {
                 pins.push([])
                 for(var j = i+1; j <= 8; j++) {
-                    var component = Qt.createComponent("FDRItem.qml")
+                    var component = Qt.createComponent("PairItem.qml")
                     if(component !== null && component.status === Component.Ready) {
                         pins[pins.length-1].push(component.createObject(pinslayout, {first: i, second: j}))
                     } else if(component !== null && component.status === Component.Error) {

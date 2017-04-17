@@ -58,7 +58,7 @@ Item {
                     a = {first: i, second: j};
                     pins[pins.length-1].push(create("Pin.qml", a, pinslayout));
                     if(values) {
-                        create("FDRItem.qml", a, pinslayout);
+                        create("PairItem.qml", a, pinslayout);
                     }
                 }
             }
@@ -68,7 +68,7 @@ Item {
                 a = {first: k, second: 9, usable: false};
                 pins[pins.length-1].push(create("Pin.qml", a, pinslayout));
                 if(values) {
-                    create("FDRItem.qml", a, pinslayout);
+                    create("PairItem.qml", a, pinslayout);
                 }
             }
         }

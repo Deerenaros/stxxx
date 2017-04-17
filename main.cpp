@@ -18,6 +18,7 @@
 #define DEBUG_TO_NET
 
 /// \todo Вылизывание рефлектометра {deadline: "never"}
+/// \todo Опорные отчёты {deadline: 04/21/17}
 /// \todo Добавление в отчёт графики {deadline: "04/21/17"}
 /// \todo Статическая линковка {deadline: "never"}
 /// \todo Ещё Меньше Лапши, МЕНЬШЕ! {deadline: "never"}

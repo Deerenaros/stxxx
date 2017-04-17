@@ -16,7 +16,7 @@
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
 
-import "../PINSelector.qml" as PairSelector
+import "../PairSelector.qml" as PairSelector
 
 Item {
     id: fdr
@@ -85,13 +85,6 @@ Item {
             Layout.rowSpan: 2
 
             values: true
-        }
-
-        function onAutomateSet(a, b, content) {
-            // devicesModel.automate = false
-            main.event();
-
-            firstSet.resultModel.clear()
         }
     }
 }

@@ -6,9 +6,11 @@
         <file>resources/FDR/Plot.qml</file>
         <file>resources/FDR/Controls.qml</file>
         <file>resources/FDR/Results.qml</file>
+        <file>resources/FDR/qmldir</file>
         <file>resources/NLD/main.qml</file>
         <file>resources/NLD/qmldir</file>
         <file>resources/Report/main.qml</file>
+        <file>resources/Report/qmldir</file>
         <file>resources/Amplifier.qml</file>
         <file>resources/DevicesList.qml</file>
         <file>resources/DeviceView.qml</file>
@@ -23,10 +25,8 @@
         <file>resources/MultiText.qml</file>
         <file>resources/TabBtn.qml</file>
         <file>resources/PairItem.qml</file>
-        <file>resources/PINSelector.qml</file>
+        <file>resources/PairSelector.qml</file>
         <file>resources/PINsResponse.qml</file>
         <file>resources/main.qml</file>
-        <file>resources/FDR/qmldir</file>
-        <file>resources/Report/qmldir</file>
     </qresource>
 </RCC>

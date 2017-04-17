@@ -130,13 +130,13 @@ GridLayout {
         Receiver {
         }
 
-        NLD {
+        NLD.main {
         }
 
-        FDR {
+        FDR.main {
         }
 
-        Report {
+        Report.main {
         }
     }
 }
