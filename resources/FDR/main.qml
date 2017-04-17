@@ -16,6 +16,8 @@
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
 
+import "../PINSelector.qml" as PairSelector
+
 Item {
     id: fdr
 
@@ -34,7 +36,7 @@ Item {
         rows: 2
         columns: 4
 
-        FDRResults {
+        Results {
             id: firstSet
 
             set: 1
@@ -47,7 +49,7 @@ Item {
             Layout.fillHeight: true
         }
 
-        FDRResults {
+        Results {
             id: secondSet
 
             set: 2
@@ -60,7 +62,7 @@ Item {
             Layout.fillHeight: true
         }
 
-        FDRControls {
+        Controls {
             Layout.column: 2
             Layout.row: 0
 
@@ -68,7 +70,7 @@ Item {
             Layout.fillWidth: true
         }
 
-        FDRSignal {
+        Plot {
             Layout.column: 0
             Layout.columnSpan: 3
             Layout.row: 1
@@ -77,7 +79,7 @@ Item {
             Layout.fillWidth: true
         }
 
-        PINSelector {
+        PairSelector {
             Layout.column: 3
             Layout.row: 0
             Layout.rowSpan: 2

@@ -1,31 +1,32 @@
 <RCC>
     <qresource prefix="/">
+        <file>resources/images/st300.jpg</file>
+        <file>resources/functions/helpers.js</file>
+        <file>resources/FDR/main.qml</file>
+        <file>resources/FDR/Plot.qml</file>
+        <file>resources/FDR/Controls.qml</file>
+        <file>resources/FDR/Results.qml</file>
+        <file>resources/NLD/main.qml</file>
+        <file>resources/NLD/qmldir</file>
+        <file>resources/Report/main.qml</file>
         <file>resources/Amplifier.qml</file>
-        <file>resources/main.qml</file>
         <file>resources/DevicesList.qml</file>
         <file>resources/DeviceView.qml</file>
         <file>resources/OffMode.qml</file>
         <file>resources/Switcher.qml</file>
         <file>resources/Oscilloscope.qml</file>
         <file>resources/Settings.qml</file>
-        <file>resources/FDR.qml</file>
         <file>resources/Receiver.qml</file>
         <file>resources/SwitchItem.qml</file>
         <file>resources/StatusBar.qml</file>
-        <file>resources/FDRItem.qml</file>
-        <file>resources/FDRItems.qml</file>
-        <file>resources/images/st300.jpg</file>
         <file>resources/Pin.qml</file>
-        <file>resources/FDRResults.qml</file>
         <file>resources/MultiText.qml</file>
-        <file>resources/FDRSignal.qml</file>
-        <file>resources/FDRControls.qml</file>
         <file>resources/TabBtn.qml</file>
+        <file>resources/PairItem.qml</file>
         <file>resources/PINSelector.qml</file>
         <file>resources/PINsResponse.qml</file>
-        <file>resources/functions/helpers.js</file>
-        <file>resources/NLD/NLD.qml</file>
-        <file>resources/NLD/qmldir</file>
-        <file>resources/Report/Report.qml</file>
+        <file>resources/main.qml</file>
+        <file>resources/FDR/qmldir</file>
+        <file>resources/Report/qmldir</file>
     </qresource>
 </RCC>

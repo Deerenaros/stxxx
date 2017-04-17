@@ -17,8 +17,9 @@ import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.0
 
-import "NLD"
-import "Report"
+import "FDR" as FDR
+import "NLD" as NLD
+import "Report" as Report
 
 GridLayout {
     id: deviceView
@@ -63,11 +64,6 @@ GridLayout {
                 TabBtn {
                     index: 1
                     text: qsTr("Settings")
-                }
-
-                TabBtn {
-                    index: 2
-                    text: qsTr("Switch")
                 }
 
                 TabBtn {
@@ -126,9 +122,6 @@ GridLayout {
         }
 
         Settings {
-        }
-
-        Switcher {
         }
 
         Amplifier {

@@ -1,0 +1,5 @@
+module FDR
+main 0.1 main.qml
+Controls 0.1 Controls.qml
+Plot 0.1 Plot.qml
+Results 0.1 Results.qml

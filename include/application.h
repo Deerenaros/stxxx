@@ -27,6 +27,8 @@ class Application : public QApplication
 
     static constexpr const char* RESOURCE_MAIN = "qrc:/resources/main.qml";
     static constexpr const char* APPLICATION_TITLE = "ST Viewer";
+    static constexpr const char* QML_PATH = "qml";
+    static constexpr const char* QRC_PATH = "qrc:/resources/";
 #ifdef Q_OS_WIN
     static constexpr const char* IMPORT_PATH = "%1/../../../../%2";
 #else

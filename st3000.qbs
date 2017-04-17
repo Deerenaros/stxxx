@@ -15,17 +15,21 @@ CppApplication {
         "include/packets.h",
         "main.cpp",
         "qml.qrc",
+
+        "resources/FDR/main.qml",
+        "resources/FDR/Controls.qml",
+        "resources/FDR/Results.qml",
+        "resources/FDR/Plot.qml",
+
+        "resources/NLD/main.qml",
+
+        "resources/Report/main.qml",
+
         "resources/Amplifier.qml",
         "resources/DeviceView.qml",
         "resources/DevicesList.qml",
-        "resources/FDR.qml",
-        "resources/FDRControls.qml",
-        "resources/FDRItem.qml",
-        "resources/FDRItems.qml",
-        "resources/FDRResults.qml",
-        "resources/FDRSignal.qml",
+        "resources/PairItem.qml",
         "resources/MultiText.qml",
-        "resources/NLD/NLD.qml",
         "resources/OffMode.qml",
         "resources/Oscilloscope.qml",
         "resources/PINSelector.qml",

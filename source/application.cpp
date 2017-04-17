@@ -34,6 +34,8 @@ Application::Application(int &argc, char **argv)
     m_model.bind(new Report("report.xlsx"));
 
     QString extraImportPath = QString(IMPORT_PATH).arg(QGuiApplication::applicationDirPath(), QString::fromLatin1("qml"));
+    m_viewer.engine()->addImportPath(QRC_PATH);
+    m_viewer.engine()->addImportPath(QML_PATH);
     m_viewer.engine()->addImportPath(extraImportPath);
     m_viewer.rootContext()->setContextProperty("devicesModel", &m_model);
     m_viewer.setTitle(APPLICATION_TITLE);
