@@ -2,14 +2,14 @@
     <qresource prefix="/">
         <file>resources/images/st300.jpg</file>
         <file>resources/functions/helpers.js</file>
-        <file>resources/FDR/main.qml</file>
+        <file>resources/FDR/Main.qml</file>
         <file>resources/FDR/Plot.qml</file>
         <file>resources/FDR/Controls.qml</file>
         <file>resources/FDR/Results.qml</file>
         <file>resources/FDR/qmldir</file>
-        <file>resources/NLD/main.qml</file>
+        <file>resources/NLD/Main.qml</file>
         <file>resources/NLD/qmldir</file>
-        <file>resources/Report/main.qml</file>
+        <file>resources/Report/Main.qml</file>
         <file>resources/Report/qmldir</file>
         <file>resources/Amplifier.qml</file>
         <file>resources/DevicesList.qml</file>

@@ -42,6 +42,9 @@
 
 #include <QAbstractSeries>
 
+#include <QXYSeries>
+#include <QAreaSeries>
+
 QT_BEGIN_NAMESPACE
 class QQuickView;
 QT_END_NAMESPACE
@@ -49,6 +52,7 @@ QT_END_NAMESPACE
 QT_CHARTS_USE_NAMESPACE
 
 #include "processor.h"
+
 
 class DeviceModel
         : public QAbstractItemModel
@@ -70,6 +74,13 @@ class DeviceModel
     Q_PROPERTY(QVariantMap properties READ getProperties WRITE setProperties NOTIFY propertiesChanged)
 
 public:
+    struct {
+        QAreaSeries *fdr;
+        QXYSeries *amplifier;
+    } series; ///< pointers to chart's series
+    bool automatic; ///< automate-mode toggle
+
+
     explicit DeviceModel(QQuickView *appViewer, QObject *parent = 0);
     ~DeviceModel();
 
@@ -84,9 +95,9 @@ public:
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &child = QModelIndex()) const;
 
-    Device& currentDevice();
-    int getCurrent() const;
+    Device& currentDevice() const;
     bool isReady() const;
+    int getCurrent() const;
     bool getAuto() const;
     int getCount() const;
 
@@ -115,8 +126,8 @@ public slots:
 
     void closeAll();
     void setCurrent(int);
+    void toReport();
     void retake();
-    void report();
     void setAuto(bool);
     void setMode(char);
     void specifyMode();
@@ -137,17 +148,17 @@ private slots:
 
 private:
     template <typename T>
-    void _setValues(const char *name, T ptr, Device *dev = nullptr) {
+    void _broadcast(const char *name, T ptr, Device *dev = nullptr) {
         for(Processor *p: m_processors) {
-            p->value(name, ptr, dev);
+            p->handle(name, ptr, dev);
         }
     }
 
     template <typename T>
-    T _getValue(const char *name) const {
+    T _request(const char *name) {
         cvoid ret = Processor::NOTHING;
         for(Processor *p: m_processors) {
-            ret = p->value(name, Processor::TAKE);
+            ret = p->handle(name, Processor::TAKE, &currentDevice());
             if(ret != Processor::NOTHING) {
                 break;
             }

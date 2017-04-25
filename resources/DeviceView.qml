@@ -21,14 +21,11 @@ import "FDR" as FDR
 import "NLD" as NLD
 import "Report" as Report
 
-GridLayout {
+RowLayout {
     id: deviceView
 
-    columnSpacing: 0
-    rowSpacing: 0
+    property bool isReportViewing: false
 
-    rows: 2
-    columns: 2
 
     Rectangle {
         color: "white"
@@ -37,10 +34,6 @@ GridLayout {
         Layout.bottomMargin: 0
         Layout.fillHeight: true
         Layout.preferredWidth: 130
-        Layout.column: 0
-        Layout.columnSpan: 1
-        Layout.row: 0
-        Layout.rowSpan: 2
 
         ListView {
             id: bar
@@ -87,15 +80,20 @@ GridLayout {
                 }
 
                 TabBtn {
-                    index: 7
+                    id: report
                     text: qsTr("Report")
+
+                    fired: function() {
+                        isReportViewing = !isReportViewing
+                        report.offColor = isReportViewing ? "red" : "lightgray"
+                    }
                 }
 
                 TabBtn {
                     text: qsTr("To Report")
 
-                    clicked: {
-                        devicesModel.report()
+                    fired: function() {
+                        devicesModel.toReport()
                     }
                 }
             }
@@ -108,17 +106,17 @@ GridLayout {
         id: tabs
 
         interactive: false
+        visible: !deviceView.isReportViewing
 
         Layout.fillHeight: true
         Layout.fillWidth: true
-        Layout.column: 1
-        Layout.columnSpan: 1
-        Layout.row: 0
-        Layout.rowSpan: 2
 
         currentIndex: bar.currentIndex
 
         OffMode {
+        }
+
+        Settings {
         }
 
         Settings {
@@ -130,13 +128,49 @@ GridLayout {
         Receiver {
         }
 
-        NLD.main {
+        NLD.Main {
         }
 
-        FDR.main {
+        FDR.Main {
+        }
+    }
+
+    SwipeView {
+        id: reports
+
+        interactive: false
+        visible: deviceView.isReportViewing
+
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+
+        currentIndex: bar.currentIndex
+
+        OffMode {
         }
 
-        Report.main {
+        Report.Main {
+            name: "settings"
+        }
+
+        Report.Main {
+            name: "settings"
+        }
+
+        Report.Main {
+            name: "amplifier"
+        }
+
+        Report.Main {
+            name: "receiver"
+        }
+
+        Report.Main {
+            name: "nld"
+        }
+
+        Report.Main {
+            name: "fdr"
         }
     }
 }

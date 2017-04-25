@@ -32,8 +32,9 @@ TO just_cast(FROM val) {
 class Processor
 {
 public:
-    permanent cvoid NOTHING = reinterpret_cast<cvoid>(0xC0000001);
-    permanent cvoid TAKE    = reinterpret_cast<cvoid>(0xC0000002);
+    permanent cvoid EVENT   = reinterpret_cast<cvoid>(0xE0000000);
+    permanent cvoid NOTHING = reinterpret_cast<cvoid>(0xE0000001);
+    permanent cvoid TAKE    = reinterpret_cast<cvoid>(0xE0000002);
 
     void setModel(DeviceModel* m) {model = m;}
 
@@ -50,14 +51,14 @@ public:
 
 
 protected:
-    virtual cvoid value(const size_t, cvoid, Device*) = 0;
+    virtual cvoid handle(const size_t, cvoid, Device*) = 0;
 
     DeviceModel* model;
 
 public:
     template<typename T>
-    T value(const char *name, T data, Device *dev = nullptr) {
-        cvoid ret = value(hash(name), reinterpret_cast<cvoid>(data), dev);
+    T handle(const char *name, T data, Device *dev = nullptr) {
+        cvoid ret = handle(hash(name), reinterpret_cast<cvoid>(data), dev);
         return just_cast<T>(ret);
     }
 };

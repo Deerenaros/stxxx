@@ -17,17 +17,21 @@ import QtQuick 2.0
 import QtQuick.Layouts 1.1
 
 Rectangle {
+    id: me
+
     property string text: ""
     property int index: -1
     property bool active: index === parent.parent.currentIndex
-    property var clicked: null
+    property var fired: null
+    property string offColor: "lightgray"
+    property string onColor: Qt.rgba(0.20784314,  0.21176471,  0.21568627, 1)
 
     height: parent.parent.height/(parent.parent.count)
     width: 120
-    color: active || index < 0 ? "lightgray" : Qt.rgba(0.20784314,  0.21176471,  0.21568627, 1)
+    color: active || index < 0 ? offColor : onColor
 
     border.width: index < 0 ? 0 : 1
-    border.color: active ? "black" : "white"
+    border.color: "white"// active ? onColor : offColor
 
     Text {
         anchors.verticalCenter: parent.verticalCenter
@@ -41,7 +45,7 @@ Rectangle {
         onClicked: {
             if(index < 0) {
                 if(clicked !== null) {
-                    clicked.call();
+                    me.fired();
                 }
             } else {
                 parent.parent.parent.currentIndex = index

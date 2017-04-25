@@ -39,12 +39,15 @@ public:
     void process(Device&, FDR&);
     void process(Device&, Flashing&);
 
+    void push(Device&);
+
 protected:
-    cvoid value(const size_t, cvoid, Device*);
+    cvoid handle(const size_t, cvoid, Device*);
 
 private:
     QString m_file;
     QXlsx::Document m_report;
+    QString m_lastRq;
 };
 
 #endif // REPORT_H

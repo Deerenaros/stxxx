@@ -13,11 +13,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QAreaSeries>
+
 #include <QQuickView>
 #include <QList>
 #include <QVariantMap>
-#include <QXYSeries>
 
 #include "betterdebug.h"
 #include "devicesmodel.h"
@@ -101,6 +100,13 @@ QVariant DeviceModel::data(const QModelIndex & index, int role) const {
     return QVariant();
 }
 
+bool DeviceModel::isReady() const {
+    return m_currentDevice >= 0
+        && m_currentDevice < m_devices.size()
+        && m_devices[m_currentDevice] != nullptr
+        && m_devices[m_currentDevice]->isReady();
+}
+
 int DeviceModel::getCurrent() const {
     return m_currentDevice;
 }
@@ -110,14 +116,7 @@ int DeviceModel::getCount() const {
 }
 
 bool DeviceModel::getAuto() const {
-    return _getValue<bool>("automate");
-}
-
-bool DeviceModel::isReady() const {
-    return m_currentDevice >= 0
-        && m_currentDevice < m_devices.size()
-        && m_devices[m_currentDevice] != nullptr
-        && m_devices[m_currentDevice]->isReady();
+    return automatic;
 }
 
 QVariantMap DeviceModel::getProperties() const {
@@ -135,7 +134,7 @@ void DeviceModel::closeAll() {
     }
 }
 
-Device& DeviceModel::currentDevice() {
+Device& DeviceModel::currentDevice() const {
     return *m_devices[m_currentDevice];
 }
 
@@ -146,13 +145,13 @@ void DeviceModel::setCurrent(int current) {
     }
 }
 
+void DeviceModel::toReport() {
+    _broadcast("report", Processor::EVENT, &currentDevice());
+}
+
 void DeviceModel::retake() {
     char buff[] = {Modes::Tx::MODE, 7};
     currentDevice().write(QByteArray(buff, 2));
-}
-
-void DeviceModel::report() {
-    // Report creating...
 }
 
 void DeviceModel::setMode(char mode) {
@@ -180,13 +179,11 @@ void DeviceModel::specifyMode() {
 }
 
 void DeviceModel::setSpectrum(QAbstractSeries* series) {
-    _setValues("spectrum", series);
-    // m_series = static_cast<QXYSeries*>(series);
+    this->series.fdr = static_cast<QAreaSeries*>(series);
 }
 
 void DeviceModel::setAmpl(QAbstractSeries* series) {
-    _setValues("ampl", series);
-    // m_series = static_cast<QXYSeries*>(series);
+    this->series.amplifier = static_cast<QXYSeries*>(series);
 }
 
 void DeviceModel::setPins(int a, int b) {
@@ -203,9 +200,9 @@ void DeviceModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8
 }
 
 void DeviceModel::setAuto(bool automate) {
-    bool value = _getValue<bool>("automate");
+    bool value = _request<bool>("automate");
     if(value != automate) {
-        _setValues("automate", automate, &currentDevice());
+        _broadcast("automate", automate, &currentDevice());
         emit autoChanged();
     }
 }

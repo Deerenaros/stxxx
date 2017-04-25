@@ -49,7 +49,7 @@ public:
     void process(Device&, QString&);
 
 protected:
-    cvoid value(const size_t, cvoid, Device*);
+    cvoid handle(const size_t, cvoid, Device*);
 
 private:
     Pins m_stop = Pins(7, 8);

@@ -13,6 +13,9 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <utility>
+#include <tuple>
+
 #include "report.h"
 
 #include "devicesmodel.h"
@@ -63,6 +66,8 @@ void Report::process(Device &dev, FDR &data) {
         m_report.addSheet("FDR");
     }
 
+    // m_report.sheet("FDR")
+
     if(data.submode == FDR::OK) {
         quint8 a = data.pins.a, b = data.pins.b, n = data.pins.N - 1;
         // sum of arithmetic progression's members with shift by second pin, doubled
@@ -90,8 +95,6 @@ void Report::process(Device &dev, FDR &data) {
             m_report.write(offset + i+FDR_HEADER_SIZE,   col, data.measments[i-1].len/10., fmtLength);
             m_report.write(offset + i+FDR_HEADER_SIZE, col+1, data.measments[i-1].lvl);
         }
-
-        qdebug("report") << (m_report.save() ? "report saved successfully" : "error during saving report");
     }
 }
 
@@ -100,10 +103,29 @@ void Report::process(Device &dev, Flashing &flash) {
     Q_UNUSED(flash);
 }
 
-cvoid Report::value(const size_t name, cvoid p, Device *dev) {
+void Report::push(Device &dev) {
+    Q_UNUSED(dev);
+    qdebug("report") << (m_report.save()
+                            ? "report saved successfully"
+                            : "error during saving report");
+}
+
+cvoid Report::handle(const size_t id, cvoid p, Device *dev) {
     Q_UNUSED(p);
     Q_UNUSED(dev);
-    switch(name) {
+
+    quint16 c, r;
+    switch(id) {
+    case "report"_h:
+        if(p == EVENT) {
+            push(*dev);
+            return NOTHING;
+        }
+
+        c = (int(p) | 0xFFFF0000) >> 16;
+        r = int(p) | 0x0000FFFF;
+        m_lastRq = m_report.read(c, r).toString();
+        return reinterpret_cast<cvoid>(&m_lastRq);
     default:
         return NOTHING;
     }

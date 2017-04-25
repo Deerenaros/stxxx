@@ -19,8 +19,24 @@ import QtQuick.Controls 1.4
 
 Item {
     id: nld
+    property string name: "none"
 
     TableView {
         anchors.fill: parent
+
+        TableViewColumn {
+            role: "n"
+            title: qsTr(name)
+        }
+        TableViewColumn {
+            role: "len"
+            title: qsTr("Length")
+        }
+        TableViewColumn {
+            role: "lvl"
+            title: qsTr("Signal Level")
+        }
+
+        model: [{n: 1, len: 10, lvl: 100}]
     }
 }

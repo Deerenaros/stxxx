@@ -16,14 +16,14 @@ CppApplication {
         "main.cpp",
         "qml.qrc",
 
-        "resources/FDR/main.qml",
+        "resources/FDR/Main.qml",
         "resources/FDR/Controls.qml",
         "resources/FDR/Results.qml",
         "resources/FDR/Plot.qml",
 
-        "resources/NLD/main.qml",
+        "resources/NLD/Main.qml",
 
-        "resources/Report/main.qml",
+        "resources/Report/Main.qml",
 
         "resources/Amplifier.qml",
         "resources/DeviceView.qml",
@@ -32,7 +32,7 @@ CppApplication {
         "resources/MultiText.qml",
         "resources/OffMode.qml",
         "resources/Oscilloscope.qml",
-        "resources/PINSelector.qml",
+        "resources/PairSelector.qml",
         "resources/PINsResponse.qml",
         "resources/Pin.qml",
         "resources/Receiver.qml",

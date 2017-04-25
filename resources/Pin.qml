@@ -23,8 +23,8 @@ Rectangle {
     property int second: 0
     property var value: null
     property bool usable: true
-    property var unselectColor: Qt.rgba(0.20784314,  0.21176471,  0.21568627, 1)
-    property var selectColor: "lightgray"
+    property color unselectColor: Qt.rgba(0.20784314,  0.21176471,  0.21568627, 1)
+    property string selectColor: "lightgray"
 
     width: 100
     Layout.preferredHeight: 14

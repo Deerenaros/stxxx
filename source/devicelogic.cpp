@@ -78,7 +78,7 @@ void DeviceLogic::process(Device &dev, Amplifier& data) {
     }
 
     if(m_ampl != nullptr) {
-        m_ampl->replace(m_amplifier);
+        model->series.amplifier->replace(m_amplifier);
     }
 
     emit model->amplifierSignal(size);
@@ -96,8 +96,6 @@ void DeviceLogic::process(Device &dev, NLD& data) {
 
 void DeviceLogic::process(Device &dev, FDR& data) {
     Q_UNUSED(dev);
-
-
 //    min: 200.0
 //    max: 205000.6
 
@@ -120,7 +118,7 @@ void DeviceLogic::process(Device &dev, FDR& data) {
         }
 
         if(data.number == 3) {
-            m_spec->setUpperSeries(&m_spectrum);
+            model->series.fdr->setUpperSeries(&m_spectrum);
         }
     } else if(data.submode == FDR::OK) {
         if(m_automate && !data.pins.next().is(m_stop)) {
@@ -166,20 +164,8 @@ void DeviceLogic::process(Device &dev, Flashing& flash) {
     }
 }
 
-cvoid DeviceLogic::value(const size_t name, cvoid p, Device *dev) {
+cvoid DeviceLogic::handle(const size_t name, cvoid p, Device *dev) {
     switch(name) {
-    case "spectrum"_h:
-        return reinterpret_cast<cvoid>(
-                    p == TAKE
-                        ? m_spec
-                        : m_spec = const_cast<QAreaSeries*>(reinterpret_cast<const QAreaSeries*>(p))
-                );
-    case "ampl"_h:
-        return reinterpret_cast<cvoid>(
-                    p == TAKE
-                        ? m_ampl
-                        : m_ampl = const_cast<QXYSeries*>(reinterpret_cast<const QXYSeries*>(p))
-                );
     case "automate"_h:
         if(p != TAKE) {
             m_automate = (p != reinterpret_cast<cvoid>(false));
