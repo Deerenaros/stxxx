@@ -62,11 +62,11 @@ void Report::process(Device &dev, FDR &data) {
     Q_UNUSED(dev);
     Q_UNUSED(data);
 
-    if(!m_report.selectSheet("FDR")) {
-        m_report.addSheet("FDR");
+    if(!m_report.selectSheet(ReportModel::Sheets::FDR)) {
+        m_report.addSheet(ReportModel::Sheets::FDR);
     }
 
-    // m_report.sheet("FDR")
+    // m_report.sheet(ReportModel::Sheets::FDR)
 
     if(data.submode == FDR::OK) {
         quint8 a = data.pins.a, b = data.pins.b, n = data.pins.N - 1;
@@ -126,6 +126,9 @@ cvoid Report::handle(const size_t id, cvoid p, Device *dev) {
         r = int(p) | 0x0000FFFF;
         m_lastRq = m_report.read(c, r).toString();
         return reinterpret_cast<cvoid>(&m_lastRq);
+    case "report_model"_h:
+        m_lastMl = ReportModel(m_report.sheet(QString(p)));
+        return reinterpret_cast<cvoid>(&m_lastMl);
     default:
         return NOTHING;
     }

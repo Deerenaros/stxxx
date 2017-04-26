@@ -22,6 +22,17 @@
 #include "processor.h"
 #include "betterdebug.h"
 
+
+class ReportModel : public QAbstractTableModel {
+public:
+    ReportModel(QXlsx::Worksheet ws, QObject *parent) : QAbstractTableModel(parent) {}
+
+    struct Sheets {
+        permanent char FDR[] = "fdr";
+    };
+};
+
+
 class Report : public Processor, private QXlsx::Document
 {
     permanent unsigned MAX_FDR_DATASET = 10;
@@ -48,6 +59,7 @@ private:
     QString m_file;
     QXlsx::Document m_report;
     QString m_lastRq;
+    ReportModel m_lastMl;
 };
 
 #endif // REPORT_H

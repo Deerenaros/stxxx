@@ -121,6 +121,7 @@ signals:
     void autoChanged();
 
 public slots:
+    QAbstractTableModel *reportModel(QString name);
     QVariantMap getProperties() const;
     void setProperties(QVariantMap);
 
