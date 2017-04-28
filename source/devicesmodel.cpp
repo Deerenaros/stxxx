@@ -119,6 +119,10 @@ bool DeviceModel::getAuto() const {
     return automatic;
 }
 
+QAbstractTableModel* DeviceModel::reportModel(QString name) {
+    return _request<QAbstractTableModel*>("rmodel", reinterpret_cast<cvoid>(name.data()));
+}
+
 QVariantMap DeviceModel::getProperties() const {
     return m_properties;
 }
@@ -173,9 +177,6 @@ void DeviceModel::setMode(char mode) {
         currentDevice().close();
         emit statusSignal(-1, -1);
     }
-}
-
-void DeviceModel::specifyMode() {
 }
 
 void DeviceModel::setSpectrum(QAbstractSeries* series) {

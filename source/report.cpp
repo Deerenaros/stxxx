@@ -21,11 +21,78 @@
 #include "devicesmodel.h"
 
 constexpr unsigned Report::MAX_FDR_DATASET;
+constexpr char ReportModel::Sheets::FDR[];
 
-Report::Report(QString file)
-    : m_file(file)
+
+int ReportModels::FDR::rowCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+    return 1;
+}
+
+int ReportModels::FDR::columnCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+    return 4;
+}
+
+QVariant ReportModels::FDR::data(const QModelIndex &index, int role) const
+{
+    if (role == Qt::DisplayRole) {
+        QString unswer = QString("row = ") + QString::number(index.row()) + "  col = " + QString::number(index.column());
+        return QVariant(unswer);
+    }
+    return QVariant();
+}
+
+QHash<int, QByteArray> ReportModels::FDR::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[Number] = "n";
+    roles[Length] = "len";
+    roles[Level] = "lvl";
+    return roles;
+}
+
+
+int ReportModel::rowCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+    return 1;
+}
+
+int ReportModel::columnCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+    return 4;
+}
+
+QVariant ReportModel::data(const QModelIndex &index, int role) const
+{
+    if (role == Qt::DisplayRole) {
+        QString unswer = QString("row = ") + QString::number(index.row()) + "  col = " + QString::number(index.column());
+        return QVariant(unswer);
+    }
+    return QVariant();
+}
+
+QHash<int, QByteArray> ReportModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[Number] = "n";
+    roles[Length] = "len";
+    roles[Level] = "lvl";
+    return roles;
+}
+
+
+
+Report::Report(QString file, QObject *parent)
+    : Processor(parent)
+    , m_file(file)
     , m_report(file)
 {
+    m_models["fdr"_h] = new ReportModels::FDR(&m_report, this);
 }
 
 void Report::process(Device &dev, Starting &s) {
@@ -115,6 +182,7 @@ cvoid Report::handle(const size_t id, cvoid p, Device *dev) {
     Q_UNUSED(dev);
 
     quint16 c, r;
+    const char* str;
     switch(id) {
     case "report"_h:
         if(p == EVENT) {
@@ -126,9 +194,13 @@ cvoid Report::handle(const size_t id, cvoid p, Device *dev) {
         r = int(p) | 0x0000FFFF;
         m_lastRq = m_report.read(c, r).toString();
         return reinterpret_cast<cvoid>(&m_lastRq);
-    case "report_model"_h:
-        m_lastMl = ReportModel(m_report.sheet(QString(p)));
-        return reinterpret_cast<cvoid>(&m_lastMl);
+    case "rmodel"_h:
+        str = reinterpret_cast<const char*>(p);
+        if(m_models.contains(hash(str))) {
+            return reinterpret_cast<cvoid>(m_models[hash(str)]);
+        }
+
+        return NOTHING;
     default:
         return NOTHING;
     }

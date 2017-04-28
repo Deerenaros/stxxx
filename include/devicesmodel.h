@@ -131,7 +131,6 @@ public slots:
     void retake();
     void setAuto(bool);
     void setMode(char);
-    void specifyMode();
     void setAmpl(QAbstractSeries*);
     void setSpectrum(QAbstractSeries*);
     void setPins(int, int);
@@ -156,10 +155,10 @@ private:
     }
 
     template <typename T>
-    T _request(const char *name) {
+    T _request(const char *name, cvoid additional = Processor::TAKE) {
         cvoid ret = Processor::NOTHING;
         for(Processor *p: m_processors) {
-            ret = p->handle(name, Processor::TAKE, &currentDevice());
+            ret = p->handle(name, additional, &currentDevice());
             if(ret != Processor::NOTHING) {
                 break;
             }
