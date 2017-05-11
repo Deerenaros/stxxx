@@ -1,4 +1,4 @@
-//    include/device.h is part of STx
+//    include/devicesmodel.cpp is part of STx
 //
 //    STx is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -19,20 +19,7 @@
 
 #include <QObject>
 #include <QVariant>
-//    include/devicesmodel.h is part of STx
-//
-//    STx is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
-//
-//    STx is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU General Public License for more details.
-//
-//    You should have received a copy of the GNU General Public License
-//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
 
 #include <QVariantList>
 #include <QAbstractItemModel>
@@ -53,6 +40,13 @@ QT_CHARTS_USE_NAMESPACE
 
 #include "processor.h"
 
+#define qproperty(type, name) \
+signals:\
+    void name##Changed();\
+private:\
+    type m_##name;\
+    Q_PROPERTY(type name MEMBER m_##name NOTIFY name##Changed)
+
 
 class DeviceModel
         : public QAbstractItemModel
@@ -66,19 +60,24 @@ class DeviceModel
         { 0x6015, "ST300" }
     };
 
+    bool m_automate;
+signals:
+    void automateChanged();
+    void propertyChanged();
+private:
+    Q_PROPERTY(bool automate MEMBER m_automate NOTIFY automateChanged)
+
     Q_PROPERTY(int current READ getCurrent WRITE setCurrent NOTIFY currentChanged)
-    Q_PROPERTY(bool automate READ getAuto WRITE setAuto NOTIFY autoChanged)
     Q_PROPERTY(bool isReady READ isReady)
     Q_PROPERTY(int count READ getCount NOTIFY countChanged)
 
-    Q_PROPERTY(QVariantMap properties READ getProperties WRITE setProperties NOTIFY propertiesChanged)
+    Q_PROPERTY(QVariantMap* properties READ getProperties NOTIFY propertyChanged)
 
 public:
     struct {
         QAreaSeries *fdr;
         QXYSeries *amplifier;
     } series; ///< pointers to chart's series
-    bool automatic; ///< automate-mode toggle
 
 
     explicit DeviceModel(QQuickView *appViewer, QObject *parent = 0);
@@ -118,18 +117,15 @@ signals:
 
     int currentChanged();
     void countChanged();
-    void autoChanged();
 
 public slots:
     QAbstractTableModel *reportModel(QString name);
-    QVariantMap getProperties() const;
-    void setProperties(QVariantMap);
+    QVariantMap *getProperties();
 
     void closeAll();
     void setCurrent(int);
     void toReport();
     void retake();
-    void setAuto(bool);
     void setMode(char);
     void setAmpl(QAbstractSeries*);
     void setSpectrum(QAbstractSeries*);

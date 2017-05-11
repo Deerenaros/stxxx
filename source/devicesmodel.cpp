@@ -115,21 +115,12 @@ int DeviceModel::getCount() const {
     return m_devices.count();
 }
 
-bool DeviceModel::getAuto() const {
-    return automatic;
-}
-
 QAbstractTableModel* DeviceModel::reportModel(QString name) {
     return _request<QAbstractTableModel*>("rmodel", reinterpret_cast<cvoid>(name.data()));
 }
 
-QVariantMap DeviceModel::getProperties() const {
-    return m_properties;
-}
-
-void DeviceModel::setProperties(QVariantMap properties) {
-    m_properties = properties;
-    emit propertiesChanged();
+QVariantMap* DeviceModel::getProperties() {
+    return &m_properties;
 }
 
 void DeviceModel::closeAll() {
@@ -200,13 +191,6 @@ void DeviceModel::setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8
     currentDevice().write(QByteArray(date, 5));
 }
 
-void DeviceModel::setAuto(bool automate) {
-    bool value = _request<bool>("automate");
-    if(value != automate) {
-        _broadcast("automate", automate, &currentDevice());
-        emit autoChanged();
-    }
-}
 
 void DeviceModel::setVelocityFactor(double factor) {
     if(isReady()) {

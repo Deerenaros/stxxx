@@ -43,9 +43,8 @@ Item {
                 text: devicesModel.automate ? qsTr("Stop") : qsTr("Scan")
 
                 onClicked: {
-                    var auto = !devicesModel.automate
-                    devicesModel.automate = auto
-                    if(auto) {
+                    devicesModel.automate = !devicesModel.automate
+                    if(devicesModel.automate) {
                         devicesModel.retake()
                     }
                 }

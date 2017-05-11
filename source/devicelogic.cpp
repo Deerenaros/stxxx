@@ -121,7 +121,7 @@ void DeviceLogic::process(Device &dev, FDR& data) {
             model->series.fdr->setUpperSeries(&m_spectrum);
         }
     } else if(data.submode == FDR::OK) {
-        if(m_automate && !data.pins.next().is(m_stop)) {
+        if(model->property("automate").toBool() && !dev.current.next().is(m_stop)) {
             dev.setPins(dev.current.next());
         }
 

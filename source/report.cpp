@@ -55,38 +55,6 @@ QHash<int, QByteArray> ReportModels::FDR::roleNames() const
 }
 
 
-int ReportModel::rowCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent);
-    return 1;
-}
-
-int ReportModel::columnCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent);
-    return 4;
-}
-
-QVariant ReportModel::data(const QModelIndex &index, int role) const
-{
-    if (role == Qt::DisplayRole) {
-        QString unswer = QString("row = ") + QString::number(index.row()) + "  col = " + QString::number(index.column());
-        return QVariant(unswer);
-    }
-    return QVariant();
-}
-
-QHash<int, QByteArray> ReportModel::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-    roles[Number] = "n";
-    roles[Length] = "len";
-    roles[Level] = "lvl";
-    return roles;
-}
-
-
-
 Report::Report(QString file, QObject *parent)
     : Processor(parent)
     , m_file(file)
@@ -133,13 +101,11 @@ void Report::process(Device &dev, FDR &data) {
         m_report.addSheet(ReportModel::Sheets::FDR);
     }
 
-    // m_report.sheet(ReportModel::Sheets::FDR)
-
     if(data.submode == FDR::OK) {
         quint8 a = data.pins.a, b = data.pins.b, n = data.pins.N - 1;
         // sum of arithmetic progression's members with shift by second pin, doubled
         int col = ( (a-1)*(2*n-(a-2))/2 ) + ( b-a ); col = col*2 - 1;
-        QVariantMap fdr = qvariant_cast<QVariantMap>(model->getProperties().value("fdr"));
+        QVariantMap fdr = qvariant_cast<QVariantMap>(model->getProperties()->value("fdr"));
         qdebug("fdr") << fdr.value("set").toInt();
         int offset = (fdr.value("set").toInt() == 1
                       ? 0

@@ -14,8 +14,8 @@
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 
-//#define DEBUG_TO_STD
-#define DEBUG_TO_NET
+#define DEBUG_TO_STD
+//#define DEBUG_TO_NET
 
 /// \todo Вылизывание рефлектометра {deadline: "never"}
 /// \todo Опорные отчёты {deadline: 05/21/17}

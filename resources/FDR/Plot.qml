@@ -73,8 +73,8 @@ Rectangle {
         Connections {
             target: devicesModel
             onFdrSpectrum: {
-                axisX.min = left;
-                axisX.max = right;
+                axisX.min = 0.8*left;
+                axisX.max = 1.2*right;
                 axisY.max = hi;
             }
         }

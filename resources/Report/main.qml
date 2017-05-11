@@ -39,6 +39,6 @@ Item {
             title: qsTr("Signal Level")
         }
 
-        model: deviceView.reportModel(name)
+        model: []//deviceView.reportModel(name)
     }
 }
