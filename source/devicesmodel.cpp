@@ -27,7 +27,7 @@ Q_DECLARE_METATYPE(QAbstractSeries *)
 Q_DECLARE_METATYPE(QAbstractAxis *)
 
 DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
-    : QAbstractItemModel(parent)
+    : ModelProperties(parent)
     , m_waitingSwitch(QPair<quint8, quint8>(0, 0))
     , m_appViewer(appViewer)
 {
@@ -37,7 +37,9 @@ DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
                     .arg(info.vendorIdentifier(), 4, 16, QChar('0'))
                     .arg(info.productIdentifier(), 4, 16, QChar('0'));
 
-        if(SUPPORTED_PIDS.contains(info.productIdentifier())) {
+        quint16 vid = info.vendorIdentifier();
+        quint16 pid = info.productIdentifier();
+        if(SUPPORTED_VID == vid && SUPPORTED_PIDS.contains(pid)) {
             QString name = SUPPORTED_PIDS[info.productIdentifier()];
             auto dev = new Device(name, info, this);
             m_devices.append(dev);
@@ -50,12 +52,8 @@ DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
         }
     }
 
-    QVariantMap fdr;
-    fdr.insert("set", 1);
-    m_properties["fdr"] = fdr;
-
     if(m_devices.count() > 0) {
-        m_currentDevice = 0;
+        m_current = 0;
     }
 }
 
@@ -65,62 +63,15 @@ DeviceModel::~DeviceModel() {
     }
 }
 
-int DeviceModel::rowCount(const QModelIndex & parent) const {
-    Q_UNUSED(parent);
-    return m_devices.count();
-}
-
-int DeviceModel::columnCount(const QModelIndex & parent) const {
-    Q_UNUSED(parent);
-    return COLUMN_COUNT;
-}
-
-QModelIndex DeviceModel::index(int row, int column, const QModelIndex &parent) const {
-    Q_UNUSED(parent);
-    return createIndex(row, column);
-}
-
-QModelIndex DeviceModel::parent(const QModelIndex &child) const {
-    Q_UNUSED(child);
-    return QModelIndex();
-}
-
-QVariant DeviceModel::data(const QModelIndex & index, int role) const {
-    if (index.row() < 0 || index.row() >= m_devices.count()) {
-        return QVariant();
-    }
-
-    switch(role) {
-    case NameRole:
-        return m_devices[index.row()]->name();
-    case DIdRole:
-        return m_devices[index.row()]->did();
-    }
-
-    return QVariant();
-}
-
 bool DeviceModel::isReady() const {
-    return m_currentDevice >= 0
-        && m_currentDevice < m_devices.size()
-        && m_devices[m_currentDevice] != nullptr
-        && m_devices[m_currentDevice]->isReady();
-}
-
-int DeviceModel::getCurrent() const {
-    return m_currentDevice;
-}
-
-int DeviceModel::getCount() const {
-    return m_devices.count();
+    return m_current >= 0
+        && m_current < m_devices.size()
+        && m_devices[m_current] != nullptr
+        && m_devices[m_current]->isReady();
 }
 
 QAbstractTableModel* DeviceModel::reportModel(QString name) {
     return _request<QAbstractTableModel*>("rmodel", reinterpret_cast<cvoid>(name.data()));
-}
-
-QVariantMap* DeviceModel::getProperties() {
-    return &m_properties;
 }
 
 void DeviceModel::closeAll() {
@@ -130,12 +81,12 @@ void DeviceModel::closeAll() {
 }
 
 Device& DeviceModel::currentDevice() const {
-    return *m_devices[m_currentDevice];
+    return *m_devices[m_current];
 }
 
 void DeviceModel::setCurrent(int current) {
-    if(m_currentDevice != current) {
-        m_currentDevice = current;
+    if(m_current != current) {
+        m_current = current;
         emit currentChanged();
     }
 }
@@ -208,13 +159,6 @@ void DeviceModel::flashCurrent(QString fileName) {
 void DeviceModel::deviceError(QString error, Device::Error type) {
     Q_UNUSED(type);
     emit firmwareError(error);
-}
-
-QHash<int, QByteArray> DeviceModel::roleNames() const {
-    QHash<int, QByteArray> roles;
-    roles[NameRole] = "name";
-    roles[DIdRole] = "did";
-    return roles;
 }
 
 void DeviceModel::_specifyOnModeChange(char mode) {

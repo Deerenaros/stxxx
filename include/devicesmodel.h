@@ -39,39 +39,21 @@ QT_END_NAMESPACE
 QT_CHARTS_USE_NAMESPACE
 
 #include "processor.h"
-
-#define qproperty(type, name) \
-signals:\
-    void name##Changed();\
-private:\
-    type m_##name;\
-    Q_PROPERTY(type name MEMBER m_##name NOTIFY name##Changed)
+#include "modelproperties.h"
 
 
-class DeviceModel
-        : public QAbstractItemModel
+class DeviceModel : public ModelProperties
 {
     Q_OBJECT
 
-    static const int COLUMN_COUNT = 1;
-    static const int SWITCH_MODE = 3;
-    static const int SWITCH_PACKETS_TO_RESET = -5;
-    const QMap<uint16_t, QString> SUPPORTED_PIDS = {
+    permanent int COLUMN_COUNT = 1;
+    permanent int SWITCH_MODE = 3;
+    permanent int SWITCH_PACKETS_TO_RESET = -5;
+
+    permanent quint16 SUPPORTED_VID = 0x0403;
+    const QMap<qint16, QString> SUPPORTED_PIDS = {
         { 0x6015, "ST300" }
     };
-
-    bool m_automate;
-signals:
-    void automateChanged();
-    void propertyChanged();
-private:
-    Q_PROPERTY(bool automate MEMBER m_automate NOTIFY automateChanged)
-
-    Q_PROPERTY(int current READ getCurrent WRITE setCurrent NOTIFY currentChanged)
-    Q_PROPERTY(bool isReady READ isReady)
-    Q_PROPERTY(int count READ getCount NOTIFY countChanged)
-
-    Q_PROPERTY(QVariantMap* properties READ getProperties NOTIFY propertyChanged)
 
 public:
     struct {
@@ -79,27 +61,10 @@ public:
         QXYSeries *amplifier;
     } series; ///< pointers to chart's series
 
-
     explicit DeviceModel(QQuickView *appViewer, QObject *parent = 0);
     ~DeviceModel();
 
-    enum DevicesRoles {
-        NameRole = Qt::UserRole + 1,
-        DIdRole
-    };
-
-    int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex &child = QModelIndex()) const;
-
     Device& currentDevice() const;
-    bool isReady() const;
-    int getCurrent() const;
-    bool getAuto() const;
-    int getCount() const;
-
     void bind(Processor*);
 
 Q_SIGNALS:
@@ -115,12 +80,10 @@ signals:
     void propertiesChanged();
     void fdrSpectrum(double left, double right, double hi);
 
-    int currentChanged();
-    void countChanged();
-
 public slots:
-    QAbstractTableModel *reportModel(QString name);
-    QVariantMap *getProperties();
+    bool isReady() const;
+
+    QAbstractTableModel* reportModel(QString name);
 
     void closeAll();
     void setCurrent(int);
@@ -135,9 +98,6 @@ public slots:
     void deviceError(QString, Device::Error);
 
     void setDate(qint8 hours, qint8 min, qint8 year, qint8 month, qint8 day);
-
-protected:
-    QHash<int, QByteArray> roleNames() const;
 
 private slots:
     void _packetRX(Device*, Packet *packet);
@@ -168,13 +128,11 @@ private:
 
     QPair<qint8, qint8> m_waitingSwitch;
     int m_waitingReset = SWITCH_PACKETS_TO_RESET;
-    int m_currentDevice = -1;
+    int m_current = -1;
     char m_currentMode = 0x00;
     QQuickView *m_appViewer = nullptr;
     QList<Device*> m_devices;
     QList<Processor*> m_processors;
-
-    QVariantMap m_properties;
 };
 
 #endif // DEVICESMODEL_H

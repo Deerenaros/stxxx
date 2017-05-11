@@ -5,6 +5,7 @@ CppApplication {
         "include/devicelogic.h",
         "include/hash.h",
         "include/locked.h",
+        "include/modelproperties.h",
         "include/processor.h",
         "include/report.h",
         "libs/**/*",

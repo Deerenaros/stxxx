@@ -17,26 +17,50 @@ import QtQuick 2.0
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4
 
+
 Item {
+    function create(path, attrs, parent) {
+        var component = Qt.createComponent(path)
+        if(component !== null && component.status === Component.Ready) {
+            return component.createObject(parent, attrs);
+        } else if(component !== null && component.status === Component.Error) {
+            console.debug(component.errorString())
+        }
+
+        return null;
+    }
+
     id: nld
     property string name: "none"
+    property var attrs: {
+        "fdr": {
+            "rows": 10,
+            "cols": 10,
+        },
+        "default": {
+            "rows": 1,
+            "cols": 2,
+        }
+    }
+
+    Component {
+        id: column
+        TableViewColumn{width: 100 }
+    }
 
     TableView {
+        id: table
+
         anchors.fill: parent
 
-        TableViewColumn {
-            role: "n"
-            title: qsTr("Number")
-        }
-
-        TableViewColumn {
-            role: "len"
-            title: qsTr("Length")
-        }
-
-        TableViewColumn {
-            role: "lvl"
-            title: qsTr("Signal Level")
+        Component.onCompleted: {
+            var a = attrs[name] || attrs["default"]
+            console.log(name)
+            for(var c = 0; c < a.cols; c++) {
+                var b = {"role": c.toString(), "title": c.toString()}
+                column.createObject(table, b)
+                console.log("fuck" + c);
+            }
         }
 
         model: []//deviceView.reportModel(name)

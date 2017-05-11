@@ -24,6 +24,7 @@
 
 typedef qint8 mode;
 
+/// Escape codes
 struct Stuff {
     permanent char START = '\xC0';
     permanent char END = '\xC1';
@@ -33,6 +34,7 @@ struct Stuff {
     permanent char ESC_ESC = '\xDE';
 };
 
+/// Modes of communication with device
 struct Modes {
     struct Rx {
         permanent char BATTERY = 'B';
@@ -56,6 +58,7 @@ struct Modes {
     };
 };
 
+/// Types and units of measurment
 struct Constants {
     permanent quint8 usec = 0;
     permanent quint8 msec = 1;
@@ -71,7 +74,7 @@ struct Constants {
     permanent quint8 wideFQ = 1;
 };
 
-
+/// Representing of input pins with helpers methods
 struct Pins {
     permanent quint8 N = 8;
 
@@ -84,7 +87,6 @@ struct Pins {
     }
 
     Pins next() {
-        // HOOOOLY SHIT!
         return Pins(
             (a == 7 && b == 8
                 ? 1
@@ -220,8 +222,8 @@ struct Amplifier {
 };
 
 struct Switch {
-    quint16 dc;
-    quint16 ac;
+    quint16 dc;             ///< Direct current
+    quint16 ac;             ///< Alternate current
     Pins   pins;            ///< Current lines (0~8, 0~8)
 };
 
@@ -246,9 +248,7 @@ struct Receiver {
 
     union {
         Receiver::Spectre spectr;
-
         Receiver::Search search;
-
         Receiver::Oscillogramme oscillogramme;
     };
 };
@@ -275,8 +275,8 @@ struct FDR {
     };
 
     struct Measure {
-        quint16 len;
-        quint8  lvl;
+        quint16 len;        ///< Measured length of wire
+        quint8  lvl;        ///< Measured abstract level of signal
     };
 
     quint8 submode;
@@ -295,6 +295,7 @@ struct FDR {
     };
 };
 
+/// Receiving data
 struct Packet {
     mode mod;
     union Misc {

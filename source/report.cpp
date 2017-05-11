@@ -105,7 +105,7 @@ void Report::process(Device &dev, FDR &data) {
         quint8 a = data.pins.a, b = data.pins.b, n = data.pins.N - 1;
         // sum of arithmetic progression's members with shift by second pin, doubled
         int col = ( (a-1)*(2*n-(a-2))/2 ) + ( b-a ); col = col*2 - 1;
-        QVariantMap fdr = qvariant_cast<QVariantMap>(model->getProperties()->value("fdr"));
+        QVariantMap fdr = qvariant_cast<QVariantMap>(model->property("fdr_set"));
         qdebug("fdr") << fdr.value("set").toInt();
         int offset = (fdr.value("set").toInt() == 1
                       ? 0

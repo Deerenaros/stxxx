@@ -48,7 +48,7 @@ Item {
                             active = true
                             resultsRoot.parent.currentSet.active = false
                             resultsRoot.parent.currentSet = resultsRoot
-                            devicesModel.properties.fdr.set = resultsRoot.set
+                            devicesModel.fdr_set = resultsRoot.set
                             devicesModel.retake()
                         }
                     }
