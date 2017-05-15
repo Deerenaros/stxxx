@@ -11,7 +11,7 @@
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//    along with STx.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <utility>
 #include <tuple>
@@ -61,6 +61,10 @@ Report::Report(QString file, QObject *parent)
     , m_report(file)
 {
     m_models["fdr"_h] = new ReportModels::FDR(&m_report, this);
+    m_models["nld"_h] = new ReportModels::FDR(&m_report, this);
+    m_models["amplifier"_h] = new ReportModels::FDR(&m_report, this);
+    m_models["rx"_h] = new ReportModels::FDR(&m_report, this);
+    m_models["sets"_h] = new ReportModels::FDR(&m_report, this);
 }
 
 void Report::process(Device &dev, Starting &s) {
@@ -105,9 +109,9 @@ void Report::process(Device &dev, FDR &data) {
         quint8 a = data.pins.a, b = data.pins.b, n = data.pins.N - 1;
         // sum of arithmetic progression's members with shift by second pin, doubled
         int col = ( (a-1)*(2*n-(a-2))/2 ) + ( b-a ); col = col*2 - 1;
-        QVariantMap fdr = qvariant_cast<QVariantMap>(model->property("fdr_set"));
-        qdebug("fdr") << fdr.value("set").toInt();
-        int offset = (fdr.value("set").toInt() == 1
+        auto fdr = model->property("fdr_set").toInt();
+        qdebug("fdr") << fdr;
+        int offset = (fdr == 1
                       ? 0
                       : FDR_HEADER_SIZE + MAX_FDR_DATASET);
 

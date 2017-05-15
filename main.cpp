@@ -11,15 +11,15 @@
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//    along with STx.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #define DEBUG_TO_STD
 //#define DEBUG_TO_NET
 
 /// \todo Вылизывание рефлектометра {deadline: "never"}
-/// \todo Опорные отчёты {deadline: 05/21/17}
-/// \todo Добавление в отчёт графики {deadline: "04/21/17"}
+/// \todo Опорные отчёты {deadline: 06/15/17}
+/// \todo Добавление в отчёт графики {deadline: "05/30/17"}
 /// \todo Статическая линковка {deadline: "never"}
 /// \todo Ещё Меньше Лапши, МЕНЬШЕ! {deadline: "never"}
 

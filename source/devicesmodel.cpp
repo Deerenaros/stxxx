@@ -11,8 +11,7 @@
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
-
+//    along with STx.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QQuickView>
 #include <QList>
@@ -31,6 +30,8 @@ DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
     , m_waitingSwitch(QPair<quint8, quint8>(0, 0))
     , m_appViewer(appViewer)
 {
+    m_fdr_set = 1;
+
     for(const QSerialPortInfo &info: QSerialPortInfo::availablePorts()) {
         qdebug("found") << QString("%1 0x%2 0x%3")
                     .arg(info.description())

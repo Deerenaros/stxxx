@@ -11,12 +11,10 @@
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//    along with STx.  If not, see <http://www.gnu.org/licenses/>.
 
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
-import QtQuick.Controls 1.4
-
 
 Item {
     function create(path, attrs, parent) {
@@ -30,39 +28,18 @@ Item {
         return null;
     }
 
-    id: nld
+    id: reportRoot
+
     property string name: "none"
-    property var attrs: {
-        "fdr": {
-            "rows": 10,
-            "cols": 10,
-        },
-        "default": {
-            "rows": 1,
-            "cols": 2,
-        }
+    property var components: {
+        "fdr": "FDR.qml",
     }
 
-    Component {
-        id: column
-        TableViewColumn{width: 100 }
-    }
-
-    TableView {
-        id: table
-
-        anchors.fill: parent
-
-        Component.onCompleted: {
-            var a = attrs[name] || attrs["default"]
-            console.log(name)
-            for(var c = 0; c < a.cols; c++) {
-                var b = {"role": c.toString(), "title": c.toString()}
-                column.createObject(table, b)
-                console.log("fuck" + c);
-            }
+    Component.onCompleted: {
+        if(name in components) {
+            create(components[name], {"model": devicesModel.reportModel(name)}, reportRoot)
+        } else {
+            create("../Placeholder.qml", {}, reportRoot)
         }
-
-        model: []//deviceView.reportModel(name)
     }
 }
