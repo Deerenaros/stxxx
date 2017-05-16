@@ -11,7 +11,7 @@
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//    along with STx.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
@@ -29,9 +29,13 @@ TO just_cast(FROM val) {
     return TO(val);
 }
 
-class Processor
+class Processor : public QObject
 {
+    Q_OBJECT
+
 public:
+    Processor(QObject *parent = nullptr) : QObject(parent) {}
+
     permanent cvoid EVENT   = reinterpret_cast<cvoid>(0xE0000000);
     permanent cvoid NOTHING = reinterpret_cast<cvoid>(0xE0000001);
     permanent cvoid TAKE    = reinterpret_cast<cvoid>(0xE0000002);
@@ -46,8 +50,6 @@ public:
     virtual void process(Device&, NLD&) = 0;
     virtual void process(Device&, FDR&) = 0;
     virtual void process(Device&, Flashing&) = 0;
-
-    // virtual void process(Device&, QString&) = 0;
 
 
 protected:

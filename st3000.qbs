@@ -5,6 +5,7 @@ CppApplication {
         "include/devicelogic.h",
         "include/hash.h",
         "include/locked.h",
+        "include/modelproperties.h",
         "include/processor.h",
         "include/report.h",
         "libs/**/*",
@@ -15,16 +16,13 @@ CppApplication {
         "include/packets.h",
         "main.cpp",
         "qml.qrc",
-
         "resources/FDR/Main.qml",
         "resources/FDR/Controls.qml",
         "resources/FDR/Results.qml",
         "resources/FDR/Plot.qml",
-
         "resources/NLD/Main.qml",
-
         "resources/Report/Main.qml",
-
+        "resources/Report/FDR.qml",
         "resources/Amplifier.qml",
         "resources/DeviceView.qml",
         "resources/DevicesList.qml",
@@ -33,6 +31,7 @@ CppApplication {
         "resources/OffMode.qml",
         "resources/Oscilloscope.qml",
         "resources/PairSelector.qml",
+        "resources/Placeholder.qml",
         "resources/PINsResponse.qml",
         "resources/Pin.qml",
         "resources/Receiver.qml",
@@ -48,6 +47,7 @@ CppApplication {
         "source/devicelogic.cpp",
         "source/devicesmodel.cpp",
         "source/report.cpp",
+        "source/reportmodels.cpp",
     ]
 
     Depends {

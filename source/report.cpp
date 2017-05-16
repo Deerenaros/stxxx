@@ -11,7 +11,7 @@
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//    along with STx.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <utility>
 #include <tuple>
@@ -21,11 +21,50 @@
 #include "devicesmodel.h"
 
 constexpr unsigned Report::MAX_FDR_DATASET;
+constexpr char ReportModel::Sheets::FDR[];
 
-Report::Report(QString file)
-    : m_file(file)
+
+int ReportModels::FDR::rowCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+    return 1;
+}
+
+int ReportModels::FDR::columnCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+    return 4;
+}
+
+QVariant ReportModels::FDR::data(const QModelIndex &index, int role) const
+{
+    if (role == Qt::DisplayRole) {
+        QString unswer = QString("row = ") + QString::number(index.row()) + "  col = " + QString::number(index.column());
+        return QVariant(unswer);
+    }
+    return QVariant();
+}
+
+QHash<int, QByteArray> ReportModels::FDR::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[Number] = "n";
+    roles[Length] = "len";
+    roles[Level] = "lvl";
+    return roles;
+}
+
+
+Report::Report(QString file, QObject *parent)
+    : Processor(parent)
+    , m_file(file)
     , m_report(file)
 {
+    m_models["fdr"_h] = new ReportModels::FDR(&m_report, this);
+    m_models["nld"_h] = new ReportModels::FDR(&m_report, this);
+    m_models["amplifier"_h] = new ReportModels::FDR(&m_report, this);
+    m_models["rx"_h] = new ReportModels::FDR(&m_report, this);
+    m_models["sets"_h] = new ReportModels::FDR(&m_report, this);
 }
 
 void Report::process(Device &dev, Starting &s) {
@@ -62,19 +101,17 @@ void Report::process(Device &dev, FDR &data) {
     Q_UNUSED(dev);
     Q_UNUSED(data);
 
-    if(!m_report.selectSheet("FDR")) {
-        m_report.addSheet("FDR");
+    if(!m_report.selectSheet(ReportModel::Sheets::FDR)) {
+        m_report.addSheet(ReportModel::Sheets::FDR);
     }
-
-    // m_report.sheet("FDR")
 
     if(data.submode == FDR::OK) {
         quint8 a = data.pins.a, b = data.pins.b, n = data.pins.N - 1;
         // sum of arithmetic progression's members with shift by second pin, doubled
         int col = ( (a-1)*(2*n-(a-2))/2 ) + ( b-a ); col = col*2 - 1;
-        QVariantMap fdr = qvariant_cast<QVariantMap>(model->getProperties().value("fdr"));
-        qdebug("fdr") << fdr.value("set").toInt();
-        int offset = (fdr.value("set").toInt() == 1
+        auto fdr = model->property("fdr_set").toInt();
+        qdebug("fdr") << fdr;
+        int offset = (fdr == 1
                       ? 0
                       : FDR_HEADER_SIZE + MAX_FDR_DATASET);
 
@@ -115,6 +152,7 @@ cvoid Report::handle(const size_t id, cvoid p, Device *dev) {
     Q_UNUSED(dev);
 
     quint16 c, r;
+    const char* str;
     switch(id) {
     case "report"_h:
         if(p == EVENT) {
@@ -126,6 +164,13 @@ cvoid Report::handle(const size_t id, cvoid p, Device *dev) {
         r = int(p) | 0x0000FFFF;
         m_lastRq = m_report.read(c, r).toString();
         return reinterpret_cast<cvoid>(&m_lastRq);
+    case "rmodel"_h:
+        str = reinterpret_cast<const char*>(p);
+        if(m_models.contains(hash(str))) {
+            return reinterpret_cast<cvoid>(m_models[hash(str)]);
+        }
+
+        return NOTHING;
     default:
         return NOTHING;
     }

@@ -28,5 +28,7 @@
         <file>resources/PairSelector.qml</file>
         <file>resources/PINsResponse.qml</file>
         <file>resources/main.qml</file>
+        <file>resources/Report/FDR.qml</file>
+        <file>resources/Placeholder.qml</file>
     </qresource>
 </RCC>

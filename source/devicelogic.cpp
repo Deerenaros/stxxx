@@ -11,7 +11,7 @@
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//    along with STx.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "devicelogic.h"
 
@@ -121,7 +121,7 @@ void DeviceLogic::process(Device &dev, FDR& data) {
             model->series.fdr->setUpperSeries(&m_spectrum);
         }
     } else if(data.submode == FDR::OK) {
-        if(m_automate && !data.pins.next().is(m_stop)) {
+        if(model->property("automate").toBool() && !dev.current.is(m_stop)) {
             dev.setPins(dev.current.next());
         }
 

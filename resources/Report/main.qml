@@ -1,4 +1,4 @@
-//    resources/Report/Report.qml is part of STx
+//    resources/Report/Main.qml is part of STx
 //
 //    STx is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -11,32 +11,35 @@
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//    along with STx.  If not, see <http://www.gnu.org/licenses/>.
 
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
-import QtQuick.Controls 1.4
 
 Item {
-    id: nld
+    function create(path, attrs, parent) {
+        var component = Qt.createComponent(path)
+        if(component !== null && component.status === Component.Ready) {
+            return component.createObject(parent, attrs);
+        } else if(component !== null && component.status === Component.Error) {
+            console.debug(component.errorString())
+        }
+
+        return null;
+    }
+
+    id: reportRoot
+
     property string name: "none"
+    property var components: {
+        "fdr": "FDR.qml",
+    }
 
-    TableView {
-        anchors.fill: parent
-
-        TableViewColumn {
-            role: "n"
-            title: qsTr(name)
+    Component.onCompleted: {
+        if(name in components) {
+            create(components[name], {"model": devicesModel.reportModel(name)}, reportRoot)
+        } else {
+            create("../Placeholder.qml", {}, reportRoot)
         }
-        TableViewColumn {
-            role: "len"
-            title: qsTr("Length")
-        }
-        TableViewColumn {
-            role: "lvl"
-            title: qsTr("Signal Level")
-        }
-
-        model: [{n: 1, len: 10, lvl: 100}]
     }
 }
