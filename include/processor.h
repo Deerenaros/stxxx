@@ -19,8 +19,8 @@
 #include "device.h"
 #include "packets.h"
 #include "hash.h"
+#include "model.h"
 
-class DeviceModel;
 
 typedef const void * cvoid;
 
@@ -34,13 +34,14 @@ class Processor : public QObject
     Q_OBJECT
 
 public:
-    Processor(QObject *parent = nullptr) : QObject(parent) {}
+    Processor(Model& model)
+        : QObject(&model)
+        , model(model)
+    {}
 
     permanent cvoid EVENT   = reinterpret_cast<cvoid>(0xE0000000);
     permanent cvoid NOTHING = reinterpret_cast<cvoid>(0xE0000001);
     permanent cvoid TAKE    = reinterpret_cast<cvoid>(0xE0000002);
-
-    void setModel(DeviceModel* m) {model = m;}
 
     virtual void process(Device&, Starting&) = 0;
     virtual void process(Device&, Battery&) = 0;
@@ -55,7 +56,7 @@ public:
 protected:
     virtual cvoid handle(const size_t, cvoid, Device*) = 0;
 
-    DeviceModel* model;
+    Model& model;
 
 public:
     template<typename T>

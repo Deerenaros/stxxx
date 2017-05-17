@@ -5,7 +5,8 @@ CppApplication {
         "include/devicelogic.h",
         "include/hash.h",
         "include/locked.h",
-        "include/modelproperties.h",
+        "include/model.h",
+        "include/modelstore.h",
         "include/processor.h",
         "include/report.h",
         "libs/**/*",
@@ -46,6 +47,7 @@ CppApplication {
         "source/device.cpp",
         "source/devicelogic.cpp",
         "source/devicesmodel.cpp",
+        "source/modelstore.cpp",
         "source/report.cpp",
         "source/reportmodels.cpp",
     ]

@@ -35,7 +35,7 @@ class DeviceLogic : public Processor
 
 public:
 
-    DeviceLogic();
+    DeviceLogic(Model &);
 
     void process(Device&, Starting&);
     void process(Device&, Battery&);

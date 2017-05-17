@@ -20,13 +20,10 @@
 #include "betterdebug.h"
 #include "devicesmodel.h"
 
-QT_CHARTS_USE_NAMESPACE
 
-Q_DECLARE_METATYPE(QAbstractSeries *)
-Q_DECLARE_METATYPE(QAbstractAxis *)
 
 DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
-    : ModelProperties(parent)
+    : Model(parent)
     , m_waitingSwitch(QPair<quint8, quint8>(0, 0))
     , m_appViewer(appViewer)
 {
@@ -69,10 +66,6 @@ bool DeviceModel::isReady() const {
         && m_current < m_devices.size()
         && m_devices[m_current] != nullptr
         && m_devices[m_current]->isReady();
-}
-
-QAbstractTableModel* DeviceModel::reportModel(QString name) {
-    return _request<QAbstractTableModel*>("rmodel", reinterpret_cast<cvoid>(name.data()));
 }
 
 void DeviceModel::closeAll() {
@@ -176,7 +169,6 @@ void DeviceModel::_specifyOnModeChange(char mode) {
 
 void DeviceModel::bind(Processor *p) {
     m_processors.append(p);
-    p->setModel(this);
 }
 
 void DeviceModel::_packetRX(Device* dev, Packet* packet) {

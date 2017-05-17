@@ -29,142 +29,142 @@ Item {
         anchors.fill: parent
 
         TableViewColumn {
-            role: "1"
+            role: "fdr12"
             title: "1-2"
         }
 
         TableViewColumn {
-            role: "2"
+            role: "fdr13"
             title: "1-3"
         }
 
         TableViewColumn {
-            role: "3"
+            role: "fdr14"
             title: "1-4"
         }
 
         TableViewColumn {
-            role: "4"
+            role: "fdr15"
             title: "1-5"
         }
 
         TableViewColumn {
-            role: "5"
+            role: "fdr16"
             title: "1-6"
         }
 
         TableViewColumn {
-            role: "6"
+            role: "fdr17"
             title: "1-7"
         }
 
         TableViewColumn {
-            role: "7"
+            role: "fdr18"
             title: "1-8"
         }
 
         TableViewColumn {
-            role: "8"
+            role: "fdr23"
             title: "2-3"
         }
 
         TableViewColumn {
-            role: "9"
+            role: "fdr24"
             title: "2-4"
         }
 
         TableViewColumn {
-            role: "10"
+            role: "fdr25"
             title: "2-5"
         }
 
         TableViewColumn {
-            role: "11"
+            role: "fdr26"
             title: "2-6"
         }
 
         TableViewColumn {
-            role: "12"
+            role: "fdr27"
             title: "2-7"
         }
 
         TableViewColumn {
-            role: "13"
+            role: "fdr28"
             title: "2-8"
         }
 
         TableViewColumn {
-            role: "14"
+            role: "fdr34"
             title: "3-4"
         }
 
         TableViewColumn {
-            role: "15"
+            role: "fdr35"
             title: "3-5"
         }
 
         TableViewColumn {
-            role: "16"
+            role: "fdr36"
             title: "3-6"
         }
 
         TableViewColumn {
-            role: "17"
+            role: "fdr37"
             title: "3-7"
         }
 
         TableViewColumn {
-            role: "18"
+            role: "fdr38"
             title: "3-8"
         }
 
         TableViewColumn {
-            role: "19"
+            role: "fdr45"
             title: "4-5"
         }
 
         TableViewColumn {
-            role: "20"
+            role: "fdr46"
             title: "4-6"
         }
 
         TableViewColumn {
-            role: "21"
+            role: "fdr47"
             title: "4-7"
         }
 
         TableViewColumn {
-            role: "22"
+            role: "fdr48"
             title: "4-8"
         }
 
         TableViewColumn {
-            role: "23"
+            role: "fdr56"
             title: "5-6"
         }
 
         TableViewColumn {
-            role: "24"
+            role: "fdr57"
             title: "5-7"
         }
 
         TableViewColumn {
-            role: "25"
+            role: "fdr58"
             title: "5-8"
         }
 
         TableViewColumn {
-            role: "26"
+            role: "fdr67"
             title: "6-7"
         }
 
         TableViewColumn {
-            role: "27"
+            role: "fdr68"
             title: "6-8"
         }
 
         TableViewColumn {
-            role: "28"
+            role: "fdr78"
             title: "7-8"
         }
 

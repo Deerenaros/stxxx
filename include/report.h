@@ -23,44 +23,17 @@
 #include "betterdebug.h"
 
 
-class ReportModel : public QAbstractTableModel {
-public:
-    ReportModel(QXlsx::Document *doc, QObject *parent=nullptr) : QAbstractTableModel(parent), doc(doc) {}
-
-    struct Sheets {
-        permanent char FDR[] = "fdr";
-    };
-protected:
-    QXlsx::Document* doc;
-};
-
-
-struct ReportModels {
-    class FDR : public ReportModel {
-    public:
-        FDR(QXlsx::Document *doc, QObject *parent=nullptr) : ReportModel(doc, parent) {}
-
-        enum Role {
-            Number=Qt::UserRole,
-            Length,
-            Level
-        };
-
-        QHash<int, QByteArray> roleNames() const;
-        int rowCount(const QModelIndex &parent) const;
-        int columnCount(const QModelIndex &parent) const;
-        QVariant data(const QModelIndex &index, int role) const;
-    };
-};
-
-
 class Report : public Processor
 {
     permanent unsigned MAX_FDR_DATASET = 10;
     permanent unsigned FDR_HEADER_SIZE = 2;
 
 public:
-    Report(QString, QObject *parent=nullptr);
+    struct Sheets {
+        permanent char FDR[] = "fdr";
+    };
+
+    Report(QString, Model&);
 
     void process(Device&, Starting&);
     void process(Device&, Battery&);
@@ -80,7 +53,6 @@ private:
     QString m_file;
     QXlsx::Document m_report;
     QString m_lastRq;
-    QHash<size_t, ReportModel*> m_models;
 };
 
 #endif // REPORT_H

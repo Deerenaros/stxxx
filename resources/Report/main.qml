@@ -37,7 +37,9 @@ Item {
 
     Component.onCompleted: {
         if(name in components) {
-            create(components[name], {"model": devicesModel.reportModel(name)}, reportRoot)
+            create(components[name], {
+                       "model": devicesModel
+                   }, reportRoot)
         } else {
             create("../Placeholder.qml", {}, reportRoot)
         }

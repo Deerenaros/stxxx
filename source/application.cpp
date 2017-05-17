@@ -30,8 +30,8 @@ Application::Application(int &argc, char **argv)
 {
     qdebug("app") << "Current directory is " << QDir::currentPath();
 
-    m_model.bind(new DeviceLogic());
-    m_model.bind(new Report("report.xlsx"));
+    m_model.bind(new DeviceLogic(m_model));
+    m_model.bind(new Report("report.xlsx", m_model));
 
     QString extraImportPath = QString(IMPORT_PATH).arg(QGuiApplication::applicationDirPath(), QString::fromLatin1("qml"));
     m_viewer.engine()->addImportPath(QRC_PATH);

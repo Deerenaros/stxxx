@@ -26,22 +26,15 @@
 #include <QPair>
 #include <QThread>
 
-#include <QAbstractSeries>
-
-#include <QXYSeries>
-#include <QAreaSeries>
-
 QT_BEGIN_NAMESPACE
 class QQuickView;
 QT_END_NAMESPACE
 
-QT_CHARTS_USE_NAMESPACE
-
 #include "processor.h"
-#include "modelproperties.h"
+#include "model.h"
 
 
-class DeviceModel : public ModelProperties
+class DeviceModel : public Model
 {
     Q_OBJECT
 
@@ -55,10 +48,6 @@ class DeviceModel : public ModelProperties
     };
 
 public:
-    struct {
-        QAreaSeries *fdr;
-        QXYSeries *amplifier;
-    } series; ///< pointers to chart's series
 
     explicit DeviceModel(QQuickView *appViewer, QObject *parent = 0);
     ~DeviceModel();
@@ -66,23 +55,9 @@ public:
     Device& currentDevice() const;
     void bind(Processor*);
 
-Q_SIGNALS:
-signals:
-    void amplifierSignal(int count);
-    void switcherSignal(int a, int b, double ac, double dc);
-    void statusSignal(double charge, bool isCharging);
-    void dateSignal(int hours, int min, int year, int month, int day);
-    void fdrSignal(int what, int a, int b, double len, unsigned lvl);
-    void pinsChanged(int a, int b);
-    void firmwareError(QString error);
-    void processed();
-    void propertiesChanged();
-    void fdrSpectrum(double left, double right, double hi);
 
 public slots:
     bool isReady() const;
-
-    QAbstractTableModel* reportModel(QString name);
 
     void closeAll();
     void setCurrent(int);

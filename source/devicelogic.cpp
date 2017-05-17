@@ -15,20 +15,20 @@
 
 #include "devicelogic.h"
 
-#include "devicesmodel.h"
-
-DeviceLogic::DeviceLogic() {
+DeviceLogic::DeviceLogic(Model &model)
+    : Processor(model)
+{
 }
 
 void DeviceLogic::process(Device &dev, Starting& data) {
     process(dev, data.battery);
 
-    emit model->pinsChanged(data.pins.a, data.pins.b);
+    emit model.pinsChanged(data.pins.a, data.pins.b);
 
     auto &s = data.settings;
     switch(data.currentMode) {
     case 1:
-        emit model->dateSignal(s.hours, s.minutes, s.year, s.month, s.day);
+        emit model.dateSignal(s.hours, s.minutes, s.year, s.month, s.day);
         break;
     }
 }
@@ -36,7 +36,7 @@ void DeviceLogic::process(Device &dev, Starting& data) {
 void DeviceLogic::process(Device &dev, Battery& data) {
     Q_UNUSED(dev);
 
-    emit model->statusSignal(BATTERY_SCALE*data.charge, data.isCharging == 1);
+    emit model.statusSignal(BATTERY_SCALE*data.charge, data.isCharging == 1);
 }
 
 void DeviceLogic::process(Device &dev, Switch& data) {
@@ -49,7 +49,7 @@ void DeviceLogic::process(Device &dev, Switch& data) {
 
     qdebug("switch") << QString("dc: %1 ac: %2 in: %3 out: %4").arg(dc).arg(ac).arg(input).arg(output);
 
-    emit model->switcherSignal(input, output, ac, dc);
+    emit model.switcherSignal(input, output, ac, dc);
 
 //    if(m_auto && _haveToContinueSwitch(QPair<qint8, qint8>(input, output))) {
 //        dev.write(_nextSwitch(input, output));
@@ -78,10 +78,10 @@ void DeviceLogic::process(Device &dev, Amplifier& data) {
     }
 
     if(m_ampl != nullptr) {
-        model->series.amplifier->replace(m_amplifier);
+        model.series.amplifier->replace(m_amplifier);
     }
 
-    emit model->amplifierSignal(size);
+    emit model.amplifierSignal(size);
 }
 
 void DeviceLogic::process(Device &dev, Receiver& data) {
@@ -118,10 +118,10 @@ void DeviceLogic::process(Device &dev, FDR& data) {
         }
 
         if(data.number == 3) {
-            model->series.fdr->setUpperSeries(&m_spectrum);
+            model.series.fdr->setUpperSeries(&m_spectrum);
         }
     } else if(data.submode == FDR::OK) {
-        if(model->property("automate").toBool() && !dev.current.is(m_stop)) {
+        if(model["automate"].toBool() && !dev.current.is(m_stop)) {
             dev.setPins(dev.current.next());
         }
 
@@ -134,19 +134,19 @@ void DeviceLogic::process(Device &dev, FDR& data) {
             }
 
             for(auto &item: list) {
-                emit model->fdrSignal(1, a, b, item.first, item.second);
+                emit model.fdrSignal(1, a, b, item.first, item.second);
             }
-            emit model->fdrSpectrum(0.8*list.first().first, 1.2*list.last().first, 1.1*hi);
+            emit model.fdrSpectrum(0.8*list.first().first, 1.2*list.last().first, 1.1*hi);
 
             qSort(list.begin(), list.end(), [](QPair<double, int> a, QPair<double, int> b) {
                 return a.second > b.second;
             });
-            emit model->fdrSignal(2, a, b, list.first().first, list.first().second);
+            emit model.fdrSignal(2, a, b, list.first().first, list.first().second);
         } else {
-            emit model->fdrSignal(-1, data.pins.a, data.pins.b, 0, 0);
+            emit model.fdrSignal(-1, data.pins.a, data.pins.b, 0, 0);
         }
     } else if(data.submode == FDR::START) {
-        emit model->fdrSignal(0, data.pins.a, data.pins.b, 0, 0);
+        emit model.fdrSignal(0, data.pins.a, data.pins.b, 0, 0);
     }
 }
 

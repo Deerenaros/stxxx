@@ -16,7 +16,7 @@
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
 
-import "../PairSelector.qml" as PairSelector
+import "../" as Root
 
 Item {
     id: fdr
@@ -79,7 +79,7 @@ Item {
             Layout.fillWidth: true
         }
 
-        PairSelector {
+        Root.PairSelector {
             Layout.column: 3
             Layout.row: 0
             Layout.rowSpan: 2

@@ -18,53 +18,15 @@
 
 #include "report.h"
 
-#include "devicesmodel.h"
-
 constexpr unsigned Report::MAX_FDR_DATASET;
-constexpr char ReportModel::Sheets::FDR[];
+constexpr char Report::Sheets::FDR[];
 
 
-int ReportModels::FDR::rowCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent);
-    return 1;
-}
-
-int ReportModels::FDR::columnCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent);
-    return 4;
-}
-
-QVariant ReportModels::FDR::data(const QModelIndex &index, int role) const
-{
-    if (role == Qt::DisplayRole) {
-        QString unswer = QString("row = ") + QString::number(index.row()) + "  col = " + QString::number(index.column());
-        return QVariant(unswer);
-    }
-    return QVariant();
-}
-
-QHash<int, QByteArray> ReportModels::FDR::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-    roles[Number] = "n";
-    roles[Length] = "len";
-    roles[Level] = "lvl";
-    return roles;
-}
-
-
-Report::Report(QString file, QObject *parent)
-    : Processor(parent)
+Report::Report(QString file, Model &model)
+    : Processor(model)
     , m_file(file)
     , m_report(file)
 {
-    m_models["fdr"_h] = new ReportModels::FDR(&m_report, this);
-    m_models["nld"_h] = new ReportModels::FDR(&m_report, this);
-    m_models["amplifier"_h] = new ReportModels::FDR(&m_report, this);
-    m_models["rx"_h] = new ReportModels::FDR(&m_report, this);
-    m_models["sets"_h] = new ReportModels::FDR(&m_report, this);
 }
 
 void Report::process(Device &dev, Starting &s) {
@@ -101,15 +63,15 @@ void Report::process(Device &dev, FDR &data) {
     Q_UNUSED(dev);
     Q_UNUSED(data);
 
-    if(!m_report.selectSheet(ReportModel::Sheets::FDR)) {
-        m_report.addSheet(ReportModel::Sheets::FDR);
+    if(!m_report.selectSheet(Sheets::FDR)) {
+        m_report.addSheet(Sheets::FDR);
     }
 
     if(data.submode == FDR::OK) {
         quint8 a = data.pins.a, b = data.pins.b, n = data.pins.N - 1;
         // sum of arithmetic progression's members with shift by second pin, doubled
         int col = ( (a-1)*(2*n-(a-2))/2 ) + ( b-a ); col = col*2 - 1;
-        auto fdr = model->property("fdr_set").toInt();
+        auto fdr = model["fdr_set"].toInt();
         qdebug("fdr") << fdr;
         int offset = (fdr == 1
                       ? 0
@@ -151,26 +113,7 @@ cvoid Report::handle(const size_t id, cvoid p, Device *dev) {
     Q_UNUSED(p);
     Q_UNUSED(dev);
 
-    quint16 c, r;
-    const char* str;
     switch(id) {
-    case "report"_h:
-        if(p == EVENT) {
-            push(*dev);
-            return NOTHING;
-        }
-
-        c = (int(p) | 0xFFFF0000) >> 16;
-        r = int(p) | 0x0000FFFF;
-        m_lastRq = m_report.read(c, r).toString();
-        return reinterpret_cast<cvoid>(&m_lastRq);
-    case "rmodel"_h:
-        str = reinterpret_cast<const char*>(p);
-        if(m_models.contains(hash(str))) {
-            return reinterpret_cast<cvoid>(m_models[hash(str)]);
-        }
-
-        return NOTHING;
     default:
         return NOTHING;
     }
