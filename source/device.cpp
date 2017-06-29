@@ -13,7 +13,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with STx.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "betterdebug.h"
+#include "utils/betterdebug.h"
 #include "device.h"
 
 Device::Device(const QString& name, const QSerialPortInfo &portInfo, QObject *parent)
@@ -42,6 +42,7 @@ QString Device::name() const {
     return m_name;
 }
 
+// device id
 QString Device::did() const {
     return QString("0x%2 0x%3")
         .arg(m_portInfo.vendorIdentifier(), 4, 16, QChar('0'))
@@ -74,22 +75,23 @@ void Device::open() {
 
 quint8 Device::checkESC(quint8 byte) {
     switch(byte) {
-    case START:
-        return 0xDC;
-    case END:
-        return 0xDD;
-    case ESC:
-        return 0xDE;
+    case Stuff::START:
+        return Stuff::ESC_START;
+    case Stuff::END:
+        return Stuff::ESC_END;
+    case Stuff::ESC:
+        return Stuff::ESC_ESC;
     }
 
     return 0;
 }
 
+// Writing data to COM-port
 void Device::write(const QByteArray &data) {
-    QString str2;
+    QString dbg;
     QByteArray str("\xC0\x00", 2);
     quint8 crc = 0, ind = str.count(), tmp;
-    str2 = QString("%1: ").arg(data.count(), 3);
+    dbg = QString("%1: ").arg(data.count(), 3);
     str[ind++] = static_cast<quint8>(data.count());
     tmp = checkESC(str[ind-1]);
 
@@ -99,10 +101,10 @@ void Device::write(const QByteArray &data) {
     }
 
     for (int i = 0; i < data.count(); i++) {
-        str2 += QString("0x%1 ").arg((quint8)data.at(i), 2, 16, QChar('0'));
+        dbg += QString("0x%1 ").arg((quint8)data.at(i), 2, 16, QChar('0'));
 
         if (i == 0) {
-            str2 += QString("(%1)  ").arg(data.at(i));
+            dbg += QString("(%1)  ").arg(data.at(i));
         }
 
         crc += data[i];
@@ -127,10 +129,10 @@ void Device::write(const QByteArray &data) {
 
     LOCKEDX( m_port->write(str, ind) );
 
-    qdebug("writen") << "<< " << str2;
+    qdebug("writen") << "<< " << dbg;
 }
 
-
+// Pre-process
 void Device::_process(Packet *p) {
     Pins last = current;
     switch (p->mod) {
@@ -155,9 +157,12 @@ void Device::_process(Packet *p) {
     }
 }
 
+
+// Here is reading from COM-buffer and parsing data
 void Device::run() {
     for(;;) {
-        LOCKEDX( auto data = (isReady() ? m_port->readAll() : QByteArray()) );
+        QByteArray data;
+        LOCKEDX( data = (isReady() ? m_port->readAll() : QByteArray()) )
         QByteArray &buff = *m_buff;
         for(char ch: data) {
             if (step == 3) {
@@ -245,6 +250,7 @@ void Device::run() {
     }
 }
 
+// Forget processed packet
 void Device::clearPacket() {
     LOCKED
 
@@ -254,6 +260,7 @@ void Device::clearPacket() {
     }
 }
 
+// Close COM-port
 void Device::close() {
     LOCKED
 
@@ -263,17 +270,19 @@ void Device::close() {
     }
 }
 
+// Change using pins
 void Device::setPins(Pins pins) {
     char buff[] = {Modes::Tx::SWITCH, char(1), char(pins.a), char(pins.b)};
     write(QByteArray(buff, 4));
 }
 
+// Flashing vars
 static quint32 size, send, step, progress=0, cnt;
-
 
 /// \todo Рефакторинг!
 /// \todo Добавить таймаут на подверждение прошивки
 /// \todo Уменьшить размер пакета до 100
+// Flashing. Not working prooper
 void Device::flash(QString fileName) {
     Q_UNUSED(size);
     Q_UNUSED(send);

@@ -109,6 +109,7 @@ void Report::push(Device &dev) {
                             : "error during saving report");
 }
 
+// just delete
 cvoid Report::handle(const size_t id, cvoid p, Device *dev) {
     Q_UNUSED(p);
     Q_UNUSED(dev);

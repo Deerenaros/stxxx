@@ -29,145 +29,173 @@ Item {
         anchors.fill: parent
 
         TableViewColumn {
-            role: "fdr12"
+            role: "fdr:12"
             title: "1-2"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr13"
+            role: "fdr:13"
             title: "1-3"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr14"
+            role: "fdr:14"
             title: "1-4"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr15"
+            role: "fdr:15"
             title: "1-5"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr16"
+            role: "fdr:16"
             title: "1-6"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr17"
+            role: "fdr:17"
             title: "1-7"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr18"
+            role: "fdr:18"
             title: "1-8"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr23"
+            role: "fdr:23"
             title: "2-3"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr24"
+            role: "fdr:24"
             title: "2-4"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr25"
+            role: "fdr:25"
             title: "2-5"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr26"
+            role: "fdr:26"
             title: "2-6"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr27"
+            role: "fdr:27"
             title: "2-7"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr28"
+            role: "fdr:28"
             title: "2-8"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr34"
+            role: "fdr:34"
             title: "3-4"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr35"
+            role: "fdr:35"
             title: "3-5"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr36"
+            role: "fdr:36"
             title: "3-6"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr37"
+            role: "fdr:37"
             title: "3-7"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr38"
+            role: "fdr:38"
             title: "3-8"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr45"
+            role: "fdr:45"
             title: "4-5"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr46"
+            role: "fdr:46"
             title: "4-6"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr47"
+            role: "fdr:47"
             title: "4-7"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr48"
+            role: "fdr:48"
             title: "4-8"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr56"
+            role: "fdr:56"
             title: "5-6"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr57"
+            role: "fdr:57"
             title: "5-7"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr58"
+            role: "fdr:58"
             title: "5-8"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr67"
+            role: "fdr:67"
             title: "6-7"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr68"
+            role: "fdr:68"
             title: "6-8"
+            width: 75
         }
 
         TableViewColumn {
-            role: "fdr78"
+            role: "fdr:78"
             title: "7-8"
+            width: 75
         }
 
-        model: report.model
+        model: devicesModel
     }
 }

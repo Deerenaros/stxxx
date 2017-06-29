@@ -17,18 +17,19 @@
 #define DEBUG_TO_STD
 //#define DEBUG_TO_NET
 
-/// \todo Вылизывание рефлектометра {deadline: "never"}
-/// \todo Опорные отчёты {deadline: 06/15/17}
-/// \todo Добавление в отчёт графики {deadline: "05/30/17"}
-/// \todo Статическая линковка {deadline: "never"}
-/// \todo Ещё Меньше Лапши, МЕНЬШЕ! {deadline: "never"}
 
+// Try to static build, need prooper rebuild full Qt
 // #include <QtPlugin>
 // Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 
 #include "application.h"
-#include "betterdebug.h"
+#include "utils/betterdebug.h"
 
+
+// Here writing message to stdout or/with socket
+// This is great idea to make another way to write
+// debug messages into file with auto upload into server.
+// Could save much time when debuging with customers.
 void qBetterDebug(QtMsgType type, const QMessageLogContext &context, const QString &_dbg) {
     QString dbg = _dbg;
 #ifdef DEBUG_TO_NET
@@ -45,8 +46,17 @@ void qBetterDebug(QtMsgType type, const QMessageLogContext &context, const QStri
     }
 #endif
 
+    // stdout
+#ifdef DEBUG_TO_STD
+    fprintf(stderr, "%s\n", dbg.replace("`", ":\t").toLocal8Bit().data());
+    fflush(stderr);
+#endif
+
+    // socket
+#ifdef DEBUG_TO_NET
     QJsonObject msg;
 
+    // building JSON-message
     switch (type) {
     case QtMsgType::QtFatalMsg:
         msg.insert("type", "fatal");
@@ -64,6 +74,7 @@ void qBetterDebug(QtMsgType type, const QMessageLogContext &context, const QStri
         break;
     }
 
+    // adding mark (custom) and message type (debug/critical/info/etc)
     if(dbg.contains('`')) {
         msg.insert("mark", dbg.split('`').first());
         msg.insert("msg", dbg.split('`').last());
@@ -76,15 +87,10 @@ void qBetterDebug(QtMsgType type, const QMessageLogContext &context, const QStri
     msg.insert("line", context.line);
     msg.insert("fn", context.function);
 
-
-#ifdef DEBUG_TO_STD
-    fprintf(stderr, "%s\n", dbg.replace("`", ":\t").toLocal8Bit().data());
-    fflush(stderr);
-#endif
-
-#ifdef DEBUG_TO_NET
+    // writing
     init = (sock.write(QJsonDocument(msg).toJson(QJsonDocument::Compact) + "`") == -1);
     if(!init) {
+        // if OK, flushing
         sock.flush();
     }
 #endif
@@ -92,7 +98,10 @@ void qBetterDebug(QtMsgType type, const QMessageLogContext &context, const QStri
 
 
 int main(int argc, char *argv[]) {
+    // Better debug message writer. Could double output
+    // into socket by enabling DEBUG_TO_NET macro
     qInstallMessageHandler(qBetterDebug);
+    // Entry point in "source/application.cpp"
     Application app(argc, argv);
     return app.exec();
 }

@@ -3,15 +3,15 @@ import qbs 1.0
 CppApplication {
     files: [
         "include/devicelogic.h",
-        "include/hash.h",
-        "include/locked.h",
         "include/model.h",
         "include/modelstore.h",
         "include/processor.h",
         "include/report.h",
+        "include/utils/betterdebug.h",
+        "include/utils/hash.h",
+        "include/utils/locked.h",
         "libs/**/*",
         "include/application.h",
-        "include/betterdebug.h",
         "include/device.h",
         "include/devicesmodel.h",
         "include/packets.h",
@@ -50,11 +50,12 @@ CppApplication {
         "source/modelstore.cpp",
         "source/report.cpp",
         "source/reportmodels.cpp",
+        "source/utils/hash.cpp",
     ]
 
     Depends {
         name: "Qt"
-        submodules: ["charts", "qml", "quick", "serialport", "network", "gui", "gui-private"]
+        submodules: ["charts", "qml", "quick", "serialport", "network", "gui", "gui-private", "sql"]
     }
 
     Depends {

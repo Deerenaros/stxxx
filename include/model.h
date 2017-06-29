@@ -1,4 +1,4 @@
-//    include/modelproperties.h is part of STx
+//    include/model.h is part of STx
 //
 //    STx is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ private:\
     Q_PROPERTY(type name MEMBER m_##name NOTIFY name##Changed)
 
 
+// This class define QML-related interface
 class Model : public ModelStore {
     Q_OBJECT
 

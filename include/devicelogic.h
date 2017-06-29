@@ -21,7 +21,7 @@
 #include <QAreaSeries>
 #include <QLineSeries>
 
-#include "betterdebug.h"
+#include "utils/betterdebug.h"
 #include "processor.h"
 
 QT_CHARTS_USE_NAMESPACE

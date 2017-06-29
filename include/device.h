@@ -28,10 +28,11 @@
 #include <QMessageBox>
 
 #include "packets.h"
-#include "locked.h"
+#include "utils/locked.h"
 
 
 /// \todo Rework to make write and read parallel
+// Device class representation
 class Device
         : public QThread
 {

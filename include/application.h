@@ -21,6 +21,7 @@
 
 #include "devicesmodel.h"
 
+// Constants defining here
 class Application : public QApplication
 {
     Q_OBJECT

@@ -20,9 +20,10 @@
 #include <QVariantMap>
 
 #include "processor.h"
-#include "betterdebug.h"
+#include "utils/betterdebug.h"
 
 
+// Report processing
 class Report : public Processor
 {
     permanent unsigned MAX_FDR_DATASET = 10;

@@ -38,10 +38,12 @@ class DeviceModel : public Model
 {
     Q_OBJECT
 
+    // some constants
     permanent int COLUMN_COUNT = 1;
     permanent int SWITCH_MODE = 3;
     permanent int SWITCH_PACKETS_TO_RESET = -5;
 
+    // Have to flash device to, for example, 0x72B0 PID
     permanent quint16 SUPPORTED_VID = 0x0403;
     const QMap<qint16, QString> SUPPORTED_PIDS = {
         { 0x6015, "ST300" }
@@ -77,6 +79,7 @@ private slots:
     void _packetRX(Device*, Packet *packet);
 
 private:
+    // Great idea to throw out this method
     template <typename T>
     void _broadcast(const char *name, T ptr, Device *dev = nullptr) {
         for(Processor *p: m_processors) {
@@ -84,6 +87,10 @@ private:
         }
     }
 
+    // And this one too, but they are need currently
+    // only for one button 'auto' in order to prooper
+    // determine stop-pins
+    // Rewrite to Qt's signal-slot
     template <typename T>
     T _request(const char *name, cvoid additional = Processor::TAKE) {
         cvoid ret = Processor::NOTHING;

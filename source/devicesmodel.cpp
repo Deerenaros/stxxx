@@ -17,7 +17,7 @@
 #include <QList>
 #include <QVariantMap>
 
-#include "betterdebug.h"
+#include "utils/betterdebug.h"
 #include "devicesmodel.h"
 
 
@@ -29,12 +29,14 @@ DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
 {
     m_fdr_set = 1;
 
+    // running throught all connected devices
     for(const QSerialPortInfo &info: QSerialPortInfo::availablePorts()) {
         qdebug("found") << QString("%1 0x%2 0x%3")
                     .arg(info.description())
                     .arg(info.vendorIdentifier(), 4, 16, QChar('0'))
                     .arg(info.productIdentifier(), 4, 16, QChar('0'));
 
+        // and choosing our device
         quint16 vid = info.vendorIdentifier();
         quint16 pid = info.productIdentifier();
         if(SUPPORTED_VID == vid && SUPPORTED_PIDS.contains(pid)) {
@@ -50,11 +52,16 @@ DeviceModel::DeviceModel(QQuickView *appViewer, QObject *parent)
         }
     }
 
+    // chosing first (not firstly) connected
     if(m_devices.count() > 0) {
         m_current = 0;
     }
+    // we also have to determine behaviour
+    // if no devices connected. Currenly
+    // app crashes
 }
 
+// closing all devices on destroying
 DeviceModel::~DeviceModel() {
     for(Device *dev: m_devices) {
         dev->close();
@@ -85,6 +92,7 @@ void DeviceModel::setCurrent(int current) {
     }
 }
 
+// rewrite to Qt's signal-slot
 void DeviceModel::toReport() {
     _broadcast("report", Processor::EVENT, &currentDevice());
 }

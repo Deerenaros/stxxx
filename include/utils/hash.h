@@ -1,4 +1,4 @@
-//    include/hash.h is part of STx
+//    include/utils/hash.h is part of STx
 //
 //    STx is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -82,5 +82,6 @@ constexpr size_t operator "" _h(const char *str, size_t) {
     return hash(str);
 }
 
+size_t hash(QString s);
 
 #endif // HASH_H

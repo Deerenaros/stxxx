@@ -28,11 +28,14 @@ Application::Application(int &argc, char **argv)
     , m_viewer()
     , m_model(&m_viewer)
 {
+    // Cheking application directory
     qdebug("app") << "Current directory is " << QDir::currentPath();
 
+    // binding model's processors (controllers in MVC)
     m_model.bind(new DeviceLogic(m_model));
     m_model.bind(new Report("report.xlsx", m_model));
 
+    // Updating QML engine
     QString extraImportPath = QString(IMPORT_PATH).arg(QGuiApplication::applicationDirPath(), QString::fromLatin1("qml"));
     m_viewer.engine()->addImportPath(QRC_PATH);
     m_viewer.engine()->addImportPath(QML_PATH);
@@ -41,12 +44,14 @@ Application::Application(int &argc, char **argv)
     m_viewer.setTitle(APPLICATION_TITLE);
     m_viewer.setSource(QUrl(RESOURCE_MAIN));
     m_viewer.setResizeMode(QQuickView::SizeRootObjectToView);
-    m_viewer.show();
+    m_viewer.show(); // and showing window
 
+    // Making close window works prooper
     connect(m_viewer.engine(), &QQmlEngine::quit, &m_viewer, &QWindow::close);
     connect(this, &QApplication::aboutToQuit, &m_model, &DeviceModel::closeAll);
 }
 
 void Application::onEvent() {
+    // do not mind
     qdebug("application") << "event!";
 }

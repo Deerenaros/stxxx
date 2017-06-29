@@ -28,6 +28,7 @@ void DeviceLogic::process(Device &dev, Starting& data) {
     auto &s = data.settings;
     switch(data.currentMode) {
     case 1:
+        // update date on UI
         emit model.dateSignal(s.hours, s.minutes, s.year, s.month, s.day);
         break;
     }
@@ -59,6 +60,9 @@ void DeviceLogic::process(Device &dev, Switch& data) {
 //    }
 }
 
+
+// Better to rewrite this into more optimal
+// and much more workable
 void DeviceLogic::process(Device &dev, Amplifier& data) {
     Q_UNUSED(dev);
 
@@ -100,6 +104,7 @@ void DeviceLogic::process(Device &dev, FDR& data) {
 //    max: 205000.6
 
     static quint8 hi;
+    // determine mode
     if(data.submode == FDR::SPECTRUM) {
         qdebug("fdr") << "spectrum";
         if(data.number == 0) {
@@ -107,6 +112,7 @@ void DeviceLogic::process(Device &dev, FDR& data) {
             hi = 0;
         }
 
+        // formating spectrum data into points
         int i = m_spectrum.count();
         for(auto byte = std::begin(data.spectrum); byte != std::end(data.spectrum); byte++, i++) {
             if(m_spectrum.count() && byte) {
@@ -117,11 +123,14 @@ void DeviceLogic::process(Device &dev, FDR& data) {
             hi = (*byte > hi ? *byte : hi);
         }
 
+        // at last packet - writing them into FDR's plot
         if(data.number == 3) {
             model.series.fdr->setUpperSeries(&m_spectrum);
         }
     } else if(data.submode == FDR::OK) {
+        // checking automation
         if(model["automate"].toBool() && !dev.current.is(m_stop)) {
+            // requesting data from next pins
             dev.setPins(dev.current.next());
         }
 
@@ -129,23 +138,28 @@ void DeviceLogic::process(Device &dev, FDR& data) {
             QList<QPair<double, int>> list;
             int a = data.pins.a, b = data.pins.b;
 
+            // formating data into pairs lenght/level
             for(qint8 i = 0; i < data.size; i++) {
                 list << QPair<double, int>(data.measments[i].len / 10., data.measments[i].lvl);
             }
 
+            // emiting for every pair signal
             for(auto &item: list) {
                 emit model.fdrSignal(1, a, b, item.first, item.second);
             }
+            // and changing diagram bounds
             emit model.fdrSpectrum(0.8*list.first().first, 1.2*list.last().first, 1.1*hi);
 
             qSort(list.begin(), list.end(), [](QPair<double, int> a, QPair<double, int> b) {
                 return a.second > b.second;
             });
+            // updating pin-rectangle on UI
             emit model.fdrSignal(2, a, b, list.first().first, list.first().second);
         } else {
             emit model.fdrSignal(-1, data.pins.a, data.pins.b, 0, 0);
         }
     } else if(data.submode == FDR::START) {
+        // if no data apply requesting (processing) state
         emit model.fdrSignal(0, data.pins.a, data.pins.b, 0, 0);
     }
 }
@@ -164,6 +178,9 @@ void DeviceLogic::process(Device &dev, Flashing& flash) {
     }
 }
 
+// cut it out
+// Rewrite to Qt's signal-slot
+// Also, i could not find where it called with name == 'automate'_h
 cvoid DeviceLogic::handle(const size_t name, cvoid p, Device *dev) {
     switch(name) {
     case "automate"_h:

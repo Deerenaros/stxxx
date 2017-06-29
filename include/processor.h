@@ -18,7 +18,6 @@
 
 #include "device.h"
 #include "packets.h"
-#include "hash.h"
 #include "model.h"
 
 
@@ -29,6 +28,7 @@ TO just_cast(FROM val) {
     return TO(val);
 }
 
+// abstract class packet processing interface
 class Processor : public QObject
 {
     Q_OBJECT
@@ -39,6 +39,7 @@ public:
         , model(model)
     {}
 
+    // This should be cutted out
     permanent cvoid EVENT   = reinterpret_cast<cvoid>(0xE0000000);
     permanent cvoid NOTHING = reinterpret_cast<cvoid>(0xE0000001);
     permanent cvoid TAKE    = reinterpret_cast<cvoid>(0xE0000002);
@@ -59,6 +60,7 @@ protected:
     Model& model;
 
 public:
+    // This is not rly need but requested by 81,88@include/devicesmodel.h
     template<typename T>
     T handle(const char *name, T data, Device *dev = nullptr) {
         cvoid ret = handle(hash(name), reinterpret_cast<cvoid>(data), dev);
